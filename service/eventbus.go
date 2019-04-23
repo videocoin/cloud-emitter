@@ -1,7 +1,7 @@
 package service
 
 import (
-	streamsv1 "github.com/VideoCoin/cloud-api/streams/v1"
+	pipelinesv1 "github.com/VideoCoin/cloud-api/pipelines/v1"
 	"github.com/VideoCoin/cloud-pkg/mqmux"
 	"github.com/sirupsen/logrus"
 )
@@ -37,12 +37,7 @@ func (e *EventBus) Stop() error {
 }
 
 func (e *EventBus) registerPublishers() error {
-	err := e.mq.Publisher("stream/update-status")
-	if err != nil {
-		return err
-	}
-
-	err = e.mq.Publisher("stream/update-stream-address")
+	err := e.mq.Publisher("pipeline/update")
 	if err != nil {
 		return err
 	}
@@ -54,10 +49,7 @@ func (e *EventBus) registerConsumers() error {
 	return nil
 }
 
-func (e *EventBus) UpdateStreamStatus(req *streamsv1.UpdateStreamRequest) error {
-	return e.mq.Publish("stream/update-status", req)
-}
-
-func (e *EventBus) UpdateStreamAddress(req *streamsv1.UpdateStreamRequest) error {
-	return e.mq.Publish("stream/update-stream-address", req)
+func (e *EventBus) UpdatePipelineStatus(req *pipelinesv1.UpdatePipelineRequest) error {
+	e.logger.Infof("sending pipeline update: %v", req)
+	return e.mq.Publish("pipeline/update", req)
 }

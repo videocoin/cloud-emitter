@@ -3,8 +3,8 @@ module github.com/VideoCoin/cloud-emitter
 go 1.12
 
 require (
-	github.com/VideoCoin/cloud-api v0.0.0-20190416180111-51ee10332eca
-	github.com/VideoCoin/cloud-pkg v0.0.0-20190414194354-81fc89d29c9d
+	github.com/VideoCoin/cloud-api v0.0.0-20190422230054-7719d78e5375
+	github.com/VideoCoin/cloud-pkg v0.0.0-20190416194921-3fe723cc5021
 	github.com/VideoCoin/common v0.1.110
 	github.com/VideoCoin/go-videocoin v0.0.0-20190401175528-dcf3542feb8e
 	github.com/allegro/bigcache v1.2.0 // indirect
@@ -20,7 +20,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.8.5 // indirect
-	github.com/jinzhu/gorm v1.9.4
+	github.com/jinzhu/gorm v1.9.4 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/mwitkow/go-proto-validators v0.0.0-20190212092829-1f388280e944 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
@@ -33,3 +33,5 @@ require (
 	google.golang.org/grpc v1.20.0
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 )
+
+// replace github.com/VideoCoin/cloud-api => ../cloud-api

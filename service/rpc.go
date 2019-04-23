@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"math/rand"
 	"net"
+	"time"
 
 	accountsv1 "github.com/VideoCoin/cloud-api/accounts/v1"
 	v1 "github.com/VideoCoin/cloud-api/emitter/v1"
+	pipelinesv1 "github.com/VideoCoin/cloud-api/pipelines/v1"
 	"github.com/VideoCoin/cloud-api/rpc"
-	streamsv1 "github.com/VideoCoin/cloud-api/streams/v1"
-	"github.com/VideoCoin/cloud-pkg/auth"
 	"github.com/VideoCoin/cloud-pkg/grpcutil"
 	"github.com/VideoCoin/common/bcops"
 	sm "github.com/VideoCoin/common/streamManager"
@@ -26,6 +26,10 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 type RpcServerOptions struct {
 	Addr            string
 	NodeRPCAddr     string
@@ -34,10 +38,9 @@ type RpcServerOptions struct {
 	Accounts        accountsv1.AccountServiceClient
 	EB              *EventBus
 
-	KeyManager       string
-	SecretKeyManager string
-	SecretKeyClient  string
-	Secret           string
+	Secret  string
+	MKey    string
+	MSecret string
 }
 
 type RpcServer struct {
@@ -52,10 +55,9 @@ type RpcServer struct {
 	streamManager *sm.Manager
 	eventListener *EventListener
 
-	keyManager       string
-	secretKeyManager string
-	secretKeyClient  string
-	secret           string
+	secret  string
+	mKey    string
+	mSecret string
 }
 
 func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
@@ -67,13 +69,13 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 		return nil, err
 	}
 
-	client, err := ethclient.Dial(opts.NodeRPCAddr)
+	ethClient, err := ethclient.Dial(opts.NodeRPCAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
 	}
 
 	managerAddress := common.HexToAddress(opts.ContractAddress)
-	manager, err := sm.NewManager(managerAddress, client)
+	manager, err := sm.NewManager(managerAddress, ethClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create smart contract stream manager: %s", err.Error())
 	}
@@ -92,12 +94,12 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 		logger:        opts.Logger,
 		eb:            opts.EB,
 		accounts:      opts.Accounts,
+		ethClient:     ethClient,
 		streamManager: manager,
 		eventListener: eventListener,
-
-		keyManager:       opts.KeyManager,
-		secretKeyManager: opts.SecretKeyManager,
-		secretKeyClient:  opts.SecretKeyClient,
+		secret:        opts.Secret,
+		mKey:          opts.MKey,
+		mSecret:       opts.MSecret,
 	}
 
 	v1.RegisterEmitterServiceServer(grpcServer, rpcServer)
@@ -115,94 +117,61 @@ func (s *RpcServer) Health(ctx context.Context, req *protoempty.Empty) (*rpc.Hea
 	return &rpc.HealthStatus{Status: "OK"}, nil
 }
 
-func (s *RpcServer) RequestStream(ctx context.Context, req *protoempty.Empty) (*v1.RequestStreamResponse, error) {
-	transactOpts, _, err := s.authenticate(ctx)
-	if err != nil {
-		s.logger.Error(err)
-		return nil, err
-	}
-
-	streamID := big.NewInt(int64(rand.Intn(math.MaxInt64)))
-
-	_, err = s.streamManager.RequestStream(
-		transactOpts,
-		streamID,
-		"videocoin",
-		[]*big.Int{big.NewInt(0), big.NewInt(1), big.NewInt(2)},
-	)
-	if err != nil {
-		s.logger.Error(err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	return &v1.RequestStreamResponse{
-		Address:  transactOpts.From.Hex(),
-		StreamId: streamID.Uint64(),
-	}, nil
-}
-
-func (s *RpcServer) CreateStream(ctx context.Context, req *v1.CreateStreamRequest) (*protoempty.Empty, error) {
+func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
 	err := req.Validate()
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err
 	}
 
-	transactOpts, ctx, err := s.authenticate(ctx)
+	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err
 	}
 
-	id, ok := auth.StreamIDFromContext(ctx)
-	if !ok {
-		s.logger.Error(err)
-		return nil, err
-	}
-
-	userID, ok := auth.UserIDFromContext(ctx)
-	if !ok {
-		s.logger.Error(err)
-		return nil, err
-	}
-
-	streamID := new(big.Int).SetUint64(req.StreamId)
-
-	// todo: constant value ???
-	i, e := big.NewInt(10), big.NewInt(19)
-	transactOpts.Value = i.Exp(i, e, nil)
-
-	_, err = s.streamManager.CreateStream(
-		transactOpts,
-		streamID,
-	)
-	if err != nil {
-		s.logger.Error(err)
-		return nil, rpc.ErrRpcInternal
-	}
+	userId := req.UserId
+	pipelineId := req.PipelineId
+	streamId := big.NewInt(int64(rand.Intn(math.MaxInt64)))
+	clientAddress := transactOpts.From
 
 	go func() {
-		resultCh, errCh := s.eventListener.LogStreamCreateEvent(streamID)
+		s.logger.Infof("request stream on stream id %d", streamId.Uint64())
+		_, err = s.streamManager.RequestStream(
+			transactOpts,
+			streamId,
+			"videocoin",
+			[]*big.Int{big.NewInt(0), big.NewInt(1), big.NewInt(2)},
+		)
+		if err != nil {
+			s.logger.Errorf("failed to request stream: %s", err)
+		}
 
+		resultCh, errCh := s.eventListener.LogStreamRequestEvent(
+			streamId, clientAddress)
+
+		s.logger.Infof("log stream request event on stream id %d", streamId.Uint64())
 		select {
 		case err := <-errCh:
 			s.logger.Error(err)
-			err = s.eb.UpdateStreamStatus(
-				&streamsv1.UpdateStreamRequest{
-					Id:     id,
-					UserId: userID,
-					Status: streamsv1.StreamStatusFailed,
+			err = s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:     pipelineId,
+					UserId: userId,
+					Status: pipelinesv1.PipelineStatusFailed,
 				})
 			if err != nil {
 				s.logger.Error(err)
 			}
 			return
 		case e := <-resultCh:
-			err := s.eb.UpdateStreamAddress(
-				&streamsv1.UpdateStreamRequest{
-					Id:            id,
-					UserId:        userID,
+			err := s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:            pipelineId,
+					UserId:        userId,
+					StreamId:      e.StreamID.Uint64(),
 					StreamAddress: e.StreamAddress.Hex(),
+					Status:        pipelinesv1.PipelineStatusApprovePending,
 				})
 			if err != nil {
 				s.logger.Error(err)
@@ -211,39 +180,174 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.CreateStreamReques
 		}
 	}()
 
-	return new(protoempty.Empty), nil
+	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) authenticate(ctx context.Context) (*bind.TransactOpts, context.Context, error) {
-	ctx = auth.NewContextWithSecretKey(ctx, s.secret)
-	ctx, err := auth.AuthFromContext(ctx)
+func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	err := req.Validate()
 	if err != nil {
-		return nil, ctx, rpc.ErrRpcUnauthenticated
+		s.logger.Error(err)
+		return nil, err
 	}
 
-	userID, ok := auth.UserIDFromContext(ctx)
-	if !ok {
-		return nil, ctx, rpc.ErrRpcUnauthenticated
+	transactOpts, err := s.getManagerTransactOpts(ctx)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
 	}
 
+	userId := req.UserId
+	pipelineId := req.PipelineId
+	streamId := new(big.Int).SetUint64(req.StreamId)
+
+	go func() {
+		s.logger.Infof("allow refund on stream id %d", streamId.Uint64())
+		_, err := s.streamManager.AllowRefund(transactOpts, streamId)
+		if err != nil {
+			s.logger.Errorf("failed to allow refund: %s", err)
+		}
+
+		s.logger.Infof("approve stream creation on stream id %d", streamId.Uint64())
+		_, err = s.streamManager.ApproveStreamCreation(
+			transactOpts,
+			streamId,
+			nil,
+		)
+		if err != nil {
+			s.logger.Errorf("failed to approve stream: %s", err)
+		}
+
+		s.logger.Infof("log stream approve event on stream id %d", streamId.Uint64())
+		resultCh, errCh := s.eventListener.LogStreamApproveEvent(streamId)
+		select {
+		case err := <-errCh:
+			s.logger.Error(err)
+			err = s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:     pipelineId,
+					UserId: userId,
+					Status: pipelinesv1.PipelineStatusFailed,
+				})
+			if err != nil {
+				s.logger.Error(err)
+			}
+			return
+		case e := <-resultCh:
+			err := s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:       pipelineId,
+					UserId:   userId,
+					StreamId: e.StreamID.Uint64(),
+					Status:   pipelinesv1.PipelineStatusCreatePending,
+				})
+			if err != nil {
+				s.logger.Error(err)
+			}
+			return
+		}
+	}()
+
+	return &protoempty.Empty{}, nil
+}
+
+func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	err := req.Validate()
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	userId := req.UserId
+	pipelineId := req.PipelineId
+	streamId := new(big.Int).SetUint64(req.StreamId)
+
+	// todo: constant value ???
+	i, e := big.NewInt(10), big.NewInt(19)
+	transactOpts.Value = i.Exp(i, e, nil)
+
+	go func() {
+		s.logger.Infof("create stream on stream id %d", streamId.Uint64())
+		_, err = s.streamManager.CreateStream(
+			transactOpts,
+			streamId,
+		)
+		if err != nil {
+			s.logger.Errorf("failed to create stream: %s", err)
+		}
+
+		resultCh, errCh := s.eventListener.LogStreamCreateEvent(streamId)
+
+		select {
+		case err := <-errCh:
+			s.logger.Error(err)
+			err = s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:     pipelineId,
+					UserId: userId,
+					Status: pipelinesv1.PipelineStatusFailed,
+				})
+			if err != nil {
+				s.logger.Error(err)
+			}
+			return
+		case e := <-resultCh:
+			err := s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:            pipelineId,
+					UserId:        userId,
+					StreamId:      e.StreamID.Uint64(),
+					StreamAddress: e.StreamAddress.Hex(),
+					Status:        pipelinesv1.PipelineStatusJobPending,
+				})
+			if err != nil {
+				s.logger.Error(err)
+			}
+			return
+		}
+	}()
+
+	return &protoempty.Empty{}, nil
+}
+
+func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*bind.TransactOpts, error) {
 	keyReq := &accountsv1.AccountRequest{OwnerID: userID}
 	key, err := s.accounts.Key(ctx, keyReq)
 	if err != nil {
-		return nil, ctx, rpc.ErrRpcUnauthenticated
+		return nil, err
 	}
 
-	decrypted, err := keystore.DecryptKey([]byte(key.Key), s.secretKeyClient)
+	decrypted, err := keystore.DecryptKey([]byte(key.Key), s.secret)
 	if err != nil {
-		return nil, ctx, err
+		return nil, err
 	}
 
 	transactOpts, err := bcops.GetBCAuth(s.ethClient, decrypted)
 	if err != nil {
-		return nil, ctx, rpc.ErrRpcUnauthenticated
+		return nil, err
 	}
 
 	from := common.HexToAddress(key.Address)
 	transactOpts.From = from
 
-	return transactOpts, ctx, nil
+	return transactOpts, nil
+}
+
+func (s *RpcServer) getManagerTransactOpts(ctx context.Context) (*bind.TransactOpts, error) {
+	decrypted, err := keystore.DecryptKey([]byte(s.mKey), s.mSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	transactOpts, err := bcops.GetBCAuth(s.ethClient, decrypted)
+	if err != nil {
+		return nil, err
+	}
+
+	return transactOpts, nil
 }
