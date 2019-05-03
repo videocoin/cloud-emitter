@@ -1,7 +1,9 @@
 GOOS?=linux
 GOARCH?=amd64
 
-NAME=vc_emitter
+GCP_PROJECT=videocoin-network
+
+NAME=emitter
 VERSION=$$(git describe --abbrev=0)-$$(git rev-parse --short HEAD)
 
 version:
@@ -32,13 +34,4 @@ docker-build:
 docker-push:
 	gcloud docker -- push gcr.io/${GCP_PROJECT}/${NAME}:${VERSION}
 
-dbm-status:
-	goose -dir migrations -table ${NAME} postgres "${DBM_MSQLURI}" status
-
-dbm-up:
-	goose -dir migrations -table ${NAME} postgres "${DBM_MSQLURI}" up
-
-dbm-down:
-	goose -dir migrations -table ${NAME} postgres "${DBM_MSQLURI}" down
-
-release: build docker-build docker-push
+release: docker-build docker-push

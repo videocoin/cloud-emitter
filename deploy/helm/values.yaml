@@ -1,0 +1,38 @@
+replicasCount: 3
+maxUnavailableCount: 0
+
+image:
+  repository: gcr.io/videocoin-network/emitter
+  tag: latest
+  pullPolicy: Always
+
+config: {}
+
+service:
+  type: ClusterIP
+  externalRpcPort: 5003
+  internalRpcPort: 5003
+
+autoscaler:
+  minCount: 1
+  maxCount: 10
+  targets:
+    targetCPUUtilizationPercentage: 70
+
+resources:
+  limits:
+   cpu: 200m
+   memory: 200Mi
+  requests:
+   cpu: 200m
+   memory: 200Mi
+
+secrets:
+  mqUri: ""
+  contractAddr: ""
+  nodeHttpAddr: ""
+  mKey: ""
+  mSecret: ""
+  secret: ""
+  sentryDsn: ""
+

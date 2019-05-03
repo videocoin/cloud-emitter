@@ -31,12 +31,12 @@ func init() {
 }
 
 type RpcServerOptions struct {
-	Addr            string
-	NodeRPCAddr     string
-	ContractAddress string
-	Logger          *logrus.Entry
-	Accounts        accountsv1.AccountServiceClient
-	EB              *EventBus
+	Addr         string
+	NodeHTTPAddr string
+	ContractAddr string
+	Logger       *logrus.Entry
+	Accounts     accountsv1.AccountServiceClient
+	EB           *EventBus
 
 	Secret  string
 	MKey    string
@@ -69,12 +69,12 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 		return nil, err
 	}
 
-	ethClient, err := ethclient.Dial(opts.NodeRPCAddr)
+	ethClient, err := ethclient.Dial(opts.NodeHTTPAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
 	}
 
-	managerAddress := common.HexToAddress(opts.ContractAddress)
+	managerAddress := common.HexToAddress(opts.ContractAddr)
 	manager, err := sm.NewManager(managerAddress, ethClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create smart contract stream manager: %s", err.Error())
