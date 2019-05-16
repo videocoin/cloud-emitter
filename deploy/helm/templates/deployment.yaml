@@ -31,12 +31,12 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: accountsRpcAddr
-            - name: EMITTER_NODEHTTPADDR
+            - name: NODEHTTPADDR
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: nodeHttpAddr
-            - name: EMITTER_CONTRACTADDR
+            - name: CONTRACTADDR
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}

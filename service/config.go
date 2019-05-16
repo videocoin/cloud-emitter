@@ -13,8 +13,8 @@ type Config struct {
 
 	MQURI string `default:"amqp://guest:guest@127.0.0.1:5672" envconfig:"MQURI"`
 
-	NodeHTTPAddr string `default:""`
-	ContractAddr string `default:""`
+	NodeHTTPAddr string `default:"" envconfig:"NODEHTTPADDR"`
+	ContractAddr string `default:"" envconfig:"CONTRACTADDR"`
 
 	MKey    string `default:""`
 	MSecret string `default:""`
