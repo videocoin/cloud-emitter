@@ -52,7 +52,7 @@ function get_vars() {
     readonly ACCOUNTS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/accountsRpcAddr`
     readonly MQ_URI=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/mqUri`
     readonly CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/contractAddr`
-    readonly NODE_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/nodeRpcAddr`
+    readonly NODE_HTTP_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/nodeHttpAddr`
     readonly MKEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/mkey`
     readonly MSECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/msecret`
     readonly SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/secret`
@@ -68,7 +68,7 @@ function deploy() {
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
         --set secrets.mqUri="${MQ_URI}" \
         --set secrets.contractAddr="${CONTRACT_ADDR}" \
-        --set secrets.nodeRpcAddr="${NODE_RPC_ADDR}" \
+        --set secrets.nodeHttpAddr="${NODE_HTTP_ADDR}" \
         --set secrets.mKey="${MKEY}" \
         --set secrets.mSecret="${MSECRET}" \
         --set secrets.secret="${SECRET}" \

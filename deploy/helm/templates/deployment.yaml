@@ -33,32 +33,32 @@ spec:
                   key: accountsRpcAddr
             - name: NODEHTTPADDR
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: nodeHttpAddr
             - name: CONTRACTADDR
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: contractAddr
             - name: MQURI
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: mqUri
             - name: EMITTER_MKEY
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: mKey
             - name: EMITTER_MSECRET
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: mSecret
             - name: EMITTER_SECRET
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: secret
             - name: SENTRY_DSN
