@@ -20,7 +20,7 @@ import (
 	"github.com/VideoCoin/go-videocoin/accounts/keystore"
 	"github.com/VideoCoin/go-videocoin/common"
 	"github.com/VideoCoin/go-videocoin/ethclient"
-	protoempty "github.com/golang/protobuf/ptypes/empty"
+	protoempty "github.com/gogo/protobuf/types"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -82,7 +82,7 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 
 	eventListenerConfig := &EventListenerConfig{
 		StreamManager: manager,
-		Timeout:       60,
+		Timeout:       120,
 		Logger:        opts.Logger,
 	}
 	eventListener := NewEventListener(eventListenerConfig)
@@ -118,12 +118,6 @@ func (s *RpcServer) Health(ctx context.Context, req *protoempty.Empty) (*rpc.Hea
 }
 
 func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
-	err := req.Validate()
-	if err != nil {
-		s.logger.Error(err)
-		return nil, err
-	}
-
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error(err)
@@ -184,12 +178,6 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 }
 
 func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
-	err := req.Validate()
-	if err != nil {
-		s.logger.Error(err)
-		return nil, err
-	}
-
 	transactOpts, err := s.getManagerTransactOpts(ctx)
 	if err != nil {
 		s.logger.Error(err)
@@ -251,12 +239,6 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 }
 
 func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
-	err := req.Validate()
-	if err != nil {
-		s.logger.Error(err)
-		return nil, err
-	}
-
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error(err)
@@ -316,7 +298,7 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 }
 
 func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*bind.TransactOpts, error) {
-	keyReq := &accountsv1.AccountRequest{OwnerID: userID}
+	keyReq := &accountsv1.AccountRequest{OwnerId: userID}
 	key, err := s.accounts.Key(ctx, keyReq)
 	if err != nil {
 		return nil, err
