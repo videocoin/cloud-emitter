@@ -165,6 +165,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 					UserId:        userId,
 					StreamId:      e.StreamID.Uint64(),
 					StreamAddress: e.StreamAddress.Hex(),
+					ClientAddress: e.Address.Hex(),
 					Status:        pipelinesv1.PipelineStatusApprovePending,
 				})
 			if err != nil {
