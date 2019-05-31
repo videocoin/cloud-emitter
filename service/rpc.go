@@ -3,11 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"math"
 	"math/big"
-	"math/rand"
 	"net"
-	"time"
 
 	accountsv1 "github.com/VideoCoin/cloud-api/accounts/v1"
 	v1 "github.com/VideoCoin/cloud-api/emitter/v1"
@@ -25,10 +22,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 type RpcServerOptions struct {
 	Addr         string
@@ -126,7 +119,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 
 	userId := req.UserId
 	pipelineId := req.PipelineId
-	streamId := big.NewInt(int64(rand.Intn(math.MaxInt64)))
+	streamId := big.NewInt(int64(req.StreamId))
 	clientAddress := transactOpts.From
 
 	go func() {
@@ -292,6 +285,29 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 				s.logger.Error(err)
 			}
 			return
+		}
+	}()
+
+	return &protoempty.Empty{}, nil
+}
+
+func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	streamId := new(big.Int).SetUint64(req.StreamId)
+
+	go func() {
+		s.logger.Infof("end stream on stream id %d", streamId.Uint64())
+		_, err = s.streamManager.EndStream(
+			transactOpts,
+			streamId,
+		)
+		if err != nil {
+			s.logger.Errorf("failed to end stream: %s", err)
 		}
 	}()
 
