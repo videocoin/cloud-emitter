@@ -18,6 +18,8 @@ import (
 	"github.com/VideoCoin/go-videocoin/common"
 	"github.com/VideoCoin/go-videocoin/ethclient"
 	protoempty "github.com/gogo/protobuf/types"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -111,6 +113,15 @@ func (s *RpcServer) Health(ctx context.Context, req *protoempty.Empty) (*rpc.Hea
 }
 
 func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
+	defer span.Finish()
+
+	span.LogFields(
+		log.String("pipeline_id", req.PipelineId),
+		log.String("user_id", req.UserId),
+		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	)
+
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error(err)
@@ -122,7 +133,10 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 	streamId := big.NewInt(int64(req.StreamId))
 	clientAddress := transactOpts.From
 
-	go func() {
+	go func(ctx context.Context) {
+		span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStreamAsync")
+		defer span.Finish()
+
 		s.logger.Infof("request stream on stream id %d", streamId.Uint64())
 		_, err = s.streamManager.RequestStream(
 			transactOpts,
@@ -134,8 +148,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 			s.logger.Errorf("failed to request stream: %s", err)
 		}
 
-		resultCh, errCh := s.eventListener.LogStreamRequestEvent(
-			streamId, clientAddress)
+		resultCh, errCh := s.eventListener.LogStreamRequestEvent(ctx, streamId, clientAddress)
 
 		s.logger.Infof("log stream request event on stream id %d", streamId.Uint64())
 		select {
@@ -166,12 +179,21 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 			}
 			return
 		}
-	}()
+	}(ctx)
 
 	return &protoempty.Empty{}, nil
 }
 
 func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStream")
+	defer span.Finish()
+
+	span.LogFields(
+		log.String("pipeline_id", req.PipelineId),
+		log.String("user_id", req.UserId),
+		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	)
+
 	transactOpts, err := s.getManagerTransactOpts(ctx)
 	if err != nil {
 		s.logger.Error(err)
@@ -182,7 +204,10 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 	pipelineId := req.PipelineId
 	streamId := new(big.Int).SetUint64(req.StreamId)
 
-	go func() {
+	go func(context.Context) {
+		span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStreamAsync")
+		defer span.Finish()
+
 		s.logger.Infof("allow refund on stream id %d", streamId.Uint64())
 		_, err := s.streamManager.AllowRefund(transactOpts, streamId)
 		if err != nil {
@@ -200,7 +225,7 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 		}
 
 		s.logger.Infof("log stream approve event on stream id %d", streamId.Uint64())
-		resultCh, errCh := s.eventListener.LogStreamApproveEvent(streamId)
+		resultCh, errCh := s.eventListener.LogStreamApproveEvent(ctx, streamId)
 		select {
 		case err := <-errCh:
 			s.logger.Error(err)
@@ -227,12 +252,21 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 			}
 			return
 		}
-	}()
+	}(ctx)
 
 	return &protoempty.Empty{}, nil
 }
 
 func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
+	defer span.Finish()
+
+	span.LogFields(
+		log.String("pipeline_id", req.PipelineId),
+		log.String("user_id", req.UserId),
+		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	)
+
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error(err)
@@ -247,7 +281,10 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 	i, e := big.NewInt(10), big.NewInt(19)
 	transactOpts.Value = i.Exp(i, e, nil)
 
-	go func() {
+	go func(context.Context) {
+		span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStreamAsync")
+		defer span.Finish()
+
 		s.logger.Infof("create stream on stream id %d", streamId.Uint64())
 		_, err = s.streamManager.CreateStream(
 			transactOpts,
@@ -257,7 +294,7 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 			s.logger.Errorf("failed to create stream: %s", err)
 		}
 
-		resultCh, errCh := s.eventListener.LogStreamCreateEvent(streamId)
+		resultCh, errCh := s.eventListener.LogStreamCreateEvent(ctx, streamId)
 
 		select {
 		case err := <-errCh:
@@ -286,21 +323,35 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 			}
 			return
 		}
-	}()
+	}(ctx)
 
 	return &protoempty.Empty{}, nil
 }
 
 func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
+	defer span.Finish()
+
+	span.LogFields(
+		log.String("pipeline_id", req.PipelineId),
+		log.String("user_id", req.UserId),
+		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	)
+
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err
 	}
 
+	userId := req.UserId
+	pipelineId := req.PipelineId
 	streamId := new(big.Int).SetUint64(req.StreamId)
 
-	go func() {
+	go func(context.Context) {
+		span, ctx := opentracing.StartSpanFromContext(ctx, "EndStreamAsync")
+		defer span.Finish()
+
 		s.logger.Infof("end stream on stream id %d", streamId.Uint64())
 		_, err = s.streamManager.EndStream(
 			transactOpts,
@@ -309,7 +360,36 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 		if err != nil {
 			s.logger.Errorf("failed to end stream: %s", err)
 		}
-	}()
+
+		resultCh, errCh := s.eventListener.LogEndStreamEvent(ctx, streamId, transactOpts.From)
+
+		select {
+		case err := <-errCh:
+			s.logger.Error(err)
+			err = s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:     pipelineId,
+					UserId: userId,
+					Status: pipelinesv1.PipelineStatusFailed,
+				})
+			if err != nil {
+				s.logger.Error(err)
+			}
+			return
+		case e := <-resultCh:
+			err := s.eb.UpdatePipelineStatus(
+				&pipelinesv1.UpdatePipelineRequest{
+					Id:       pipelineId,
+					UserId:   userId,
+					StreamId: e.StreamID.Uint64(),
+					Status:   pipelinesv1.PipelineStatusIdle,
+				})
+			if err != nil {
+				s.logger.Error(err)
+			}
+			return
+		}
+	}(ctx)
 
 	return &protoempty.Empty{}, nil
 }
