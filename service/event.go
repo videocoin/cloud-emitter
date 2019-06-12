@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/VideoCoin/go-videocoin/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var (

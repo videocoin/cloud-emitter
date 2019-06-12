@@ -6,12 +6,12 @@ import (
 	"math/big"
 	"time"
 
-	sm "github.com/VideoCoin/cloud-pkg/streamManager"
-	"github.com/VideoCoin/go-videocoin/accounts/abi/bind"
-	"github.com/VideoCoin/go-videocoin/common"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/sirupsen/logrus"
+	sm "github.com/videocoin/cloud-pkg/streamManager"
 )
 
 type EventListenerConfig struct {

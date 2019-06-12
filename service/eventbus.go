@@ -1,8 +1,8 @@
 package service
 
 import (
-	pipelinesv1 "github.com/VideoCoin/cloud-api/pipelines/v1"
-	"github.com/VideoCoin/cloud-pkg/mqmux"
+	pipelinesv1 "github.com/videocoin/cloud-api/pipelines/v1"
+	"github.com/videocoin/cloud-pkg/mqmux"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
