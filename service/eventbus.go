@@ -3,7 +3,10 @@ package service
 import (
 	pipelinesv1 "github.com/VideoCoin/cloud-api/pipelines/v1"
 	"github.com/VideoCoin/cloud-pkg/mqmux"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
+	"github.com/streadway/amqp"
 )
 
 type EventBus struct {
@@ -49,7 +52,19 @@ func (e *EventBus) registerConsumers() error {
 	return nil
 }
 
-func (e *EventBus) UpdatePipelineStatus(req *pipelinesv1.UpdatePipelineRequest) error {
+func (e *EventBus) UpdatePipelineStatus(span opentracing.Span, req *pipelinesv1.UpdatePipelineRequest) error {
 	e.logger.Infof("sending pipeline update: %v", req)
-	return e.mq.Publish("pipeline/update", req)
+
+	headers := make(amqp.Table)
+
+	ext.SpanKindRPCServer.Set(span)
+	ext.Component.Set(span, "pipelines")
+
+	span.Tracer().Inject(
+		span.Context(),
+		opentracing.TextMap,
+		mqmux.RMQHeaderCarrier(headers),
+	)
+
+	return e.mq.PublishX("pipeline/update", req, headers)
 }

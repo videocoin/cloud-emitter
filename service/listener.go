@@ -38,9 +38,9 @@ func (e *EventListener) LogStreamRequestEvent(ctx context.Context, streamID *big
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogStreamRequestEvent")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("address", address.Hex()),
-		log.String("stream_id", streamID.String()),
+	span.LogKV(
+		"address", address.Hex(),
+		"stream_id", streamID.String(),
 	)
 
 	addresses := []common.Address{address}
@@ -59,7 +59,8 @@ func (e *EventListener) LogStreamRequestEvent(ctx context.Context, streamID *big
 				err := fmt.Errorf("failed to log stream request event and exit on timeout")
 				e.logger.Error(err)
 				span.LogFields(
-					log.String("err", err.Error()),
+					log.String("event", "error"),
+					log.String("message", err.Error()),
 				)
 
 				errCh <- err
@@ -71,7 +72,8 @@ func (e *EventListener) LogStreamRequestEvent(ctx context.Context, streamID *big
 					err := fmt.Errorf("failed to log stream request event: %s", err.Error())
 					e.logger.Error(err)
 					span.LogFields(
-						log.String("err", err.Error()),
+						log.String("event", "error"),
+						log.String("message", err.Error()),
 					)
 
 					errCh <- err
@@ -82,7 +84,8 @@ func (e *EventListener) LogStreamRequestEvent(ctx context.Context, streamID *big
 						err := fmt.Errorf("failed to retrieve or parse log: %s", err.Error())
 						e.logger.Error(err)
 						span.LogFields(
-							log.String("err", err.Error()),
+							log.String("event", "error"),
+							log.String("message", err.Error()),
 						)
 
 						errCh <- err
@@ -92,6 +95,7 @@ func (e *EventListener) LogStreamRequestEvent(ctx context.Context, streamID *big
 						e := iterator.Event
 
 						span.LogFields(
+							log.String("event", "received stream request event"),
 							log.String("stream_id", e.StreamId.String()),
 							log.String("address", e.Raw.Address.Hex()),
 						)
@@ -125,9 +129,7 @@ func (e *EventListener) LogStreamCreateEvent(ctx context.Context, streamID *big.
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogStreamCreateEvent")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("stream_id", streamID.String()),
-	)
+	span.LogKV("stream_id", streamID.String())
 
 	streamAddresses := []common.Address{}
 	streamIDs := []*big.Int{streamID}
@@ -145,7 +147,8 @@ func (e *EventListener) LogStreamCreateEvent(ctx context.Context, streamID *big.
 				err := fmt.Errorf("failed to log stream create event and exit on timeout")
 				e.logger.Error(err)
 				span.LogFields(
-					log.String("err", err.Error()),
+					log.String("event", "error"),
+					log.String("message", err.Error()),
 				)
 
 				errCh <- err
@@ -157,7 +160,8 @@ func (e *EventListener) LogStreamCreateEvent(ctx context.Context, streamID *big.
 					err := fmt.Errorf("failed to log stream create event: %s", err.Error())
 					e.logger.Error(err)
 					span.LogFields(
-						log.String("err", err.Error()),
+						log.String("event", "error"),
+						log.String("message", err.Error()),
 					)
 
 					errCh <- err
@@ -168,7 +172,8 @@ func (e *EventListener) LogStreamCreateEvent(ctx context.Context, streamID *big.
 						err := fmt.Errorf("failed to retrieve or parse log: %s", err.Error())
 						e.logger.Error(err)
 						span.LogFields(
-							log.String("err", err.Error()),
+							log.String("event", "error"),
+							log.String("message", err.Error()),
 						)
 
 						errCh <- err
@@ -178,6 +183,7 @@ func (e *EventListener) LogStreamCreateEvent(ctx context.Context, streamID *big.
 						e := iterator.Event
 
 						span.LogFields(
+							log.String("event", "received stream create event"),
 							log.String("stream_id", e.StreamId.String()),
 							log.String("stream_address", e.StreamAddress.String()),
 							log.String("address", e.Raw.Address.Hex()),
@@ -213,9 +219,7 @@ func (e *EventListener) LogStreamApproveEvent(ctx context.Context, streamID *big
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogStreamApproveEvent")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("stream_id", streamID.String()),
-	)
+	span.LogKV("stream_id", streamID.String())
 
 	streamIDs := []*big.Int{streamID}
 
@@ -240,7 +244,8 @@ func (e *EventListener) LogStreamApproveEvent(ctx context.Context, streamID *big
 					err := fmt.Errorf("failed to log stream approved event: %s", err.Error())
 					e.logger.Error(err)
 					span.LogFields(
-						log.String("err", err.Error()),
+						log.String("event", "error"),
+						log.String("message", err.Error()),
 					)
 
 					errCh <- err
@@ -251,7 +256,8 @@ func (e *EventListener) LogStreamApproveEvent(ctx context.Context, streamID *big
 						err := fmt.Errorf("failed to retrieve or parse log: %s", err.Error())
 						e.logger.Error(err)
 						span.LogFields(
-							log.String("err", err.Error()),
+							log.String("event", "error"),
+							log.String("message", err.Error()),
 						)
 
 						errCh <- err
@@ -261,6 +267,7 @@ func (e *EventListener) LogStreamApproveEvent(ctx context.Context, streamID *big
 						e := iterator.Event
 
 						span.LogFields(
+							log.String("event", "received stream approved event"),
 							log.String("stream_id", e.StreamId.String()),
 							log.String("address", e.Raw.Address.Hex()),
 						)
@@ -294,9 +301,9 @@ func (e *EventListener) LogInputChunkAddEvent(ctx context.Context, streamID *big
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogInputChunkAddEvent")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("stream_id", streamID.String()),
-		log.String("chunk_id", chunkID.String()),
+	span.LogKV(
+		"stream_id", streamID.String(),
+		"chunk_id", chunkID.String(),
 	)
 
 	streamIDs := []*big.Int{streamID}
@@ -315,7 +322,8 @@ func (e *EventListener) LogInputChunkAddEvent(ctx context.Context, streamID *big
 				err := fmt.Errorf("failed to log input chunk added event and exit on timeout")
 				e.logger.Error(err)
 				span.LogFields(
-					log.String("err", err.Error()),
+					log.String("event", "error"),
+					log.String("message", err.Error()),
 				)
 
 				errCh <- err
@@ -327,7 +335,8 @@ func (e *EventListener) LogInputChunkAddEvent(ctx context.Context, streamID *big
 					err := fmt.Errorf("failed to log input chunk added event: %s", err.Error())
 					e.logger.Error(err)
 					span.LogFields(
-						log.String("err", err.Error()),
+						log.String("event", "error"),
+						log.String("message", err.Error()),
 					)
 
 					errCh <- err
@@ -338,7 +347,8 @@ func (e *EventListener) LogInputChunkAddEvent(ctx context.Context, streamID *big
 						err := fmt.Errorf("failed to retrieve or parse log: %s", err.Error())
 						e.logger.Error(err)
 						span.LogFields(
-							log.String("err", err.Error()),
+							log.String("event", "error"),
+							log.String("message", err.Error()),
 						)
 
 						errCh <- err
@@ -348,6 +358,7 @@ func (e *EventListener) LogInputChunkAddEvent(ctx context.Context, streamID *big
 						e := iterator.Event
 
 						span.LogFields(
+							log.String("event", "received input chunk added event"),
 							log.String("stream_id", e.StreamId.String()),
 							log.String("chunk_id", e.ChunkId.String()),
 							log.String("address", e.Raw.Address.Hex()),
@@ -383,9 +394,9 @@ func (e *EventListener) LogEndStreamEvent(ctx context.Context, streamID *big.Int
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogEndStreamEvent")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("stream_id", streamID.String()),
-		log.String("address", address.Hex()),
+	span.LogKV(
+		"stream_id", streamID.String(),
+		"address", address.Hex(),
 	)
 
 	streamIDs := []*big.Int{streamID}
@@ -404,7 +415,8 @@ func (e *EventListener) LogEndStreamEvent(ctx context.Context, streamID *big.Int
 				err := fmt.Errorf("failed to log end stream event and exit on timeout")
 				e.logger.Error(err)
 				span.LogFields(
-					log.String("err", err.Error()),
+					log.String("event", "error"),
+					log.String("message", err.Error()),
 				)
 
 				errCh <- err
@@ -416,7 +428,8 @@ func (e *EventListener) LogEndStreamEvent(ctx context.Context, streamID *big.Int
 					err := fmt.Errorf("failed to log end stream event: %s", err.Error())
 					e.logger.Error(err)
 					span.LogFields(
-						log.String("err", err.Error()),
+						log.String("event", "error"),
+						log.String("message", err.Error()),
 					)
 
 					errCh <- err
@@ -427,7 +440,8 @@ func (e *EventListener) LogEndStreamEvent(ctx context.Context, streamID *big.Int
 						err := fmt.Errorf("failed to retrieve or parse log: %s", err.Error())
 						e.logger.Error(err)
 						span.LogFields(
-							log.String("err", err.Error()),
+							log.String("event", "error"),
+							log.String("message", err.Error()),
 						)
 
 						errCh <- err
@@ -437,6 +451,7 @@ func (e *EventListener) LogEndStreamEvent(ctx context.Context, streamID *big.Int
 						e := iterator.Event
 
 						span.LogFields(
+							log.String("event", "received end stream event"),
 							log.String("stream_id", e.StreamId.String()),
 							log.String("address", e.Raw.Address.Hex()),
 						)

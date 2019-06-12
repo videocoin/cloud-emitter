@@ -19,7 +19,6 @@ import (
 	"github.com/VideoCoin/go-videocoin/ethclient"
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/log"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -116,10 +115,10 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("pipeline_id", req.PipelineId),
-		log.String("user_id", req.UserId),
-		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	span.LogKV(
+		"pipeline_id", req.PipelineId,
+		"user_id", req.UserId,
+		"stream_id", fmt.Sprintf("%d", req.StreamId),
 	)
 
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
@@ -155,6 +154,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		case err := <-errCh:
 			s.logger.Error(err)
 			err = s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:     pipelineId,
 					UserId: userId,
@@ -166,6 +166,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 			return
 		case e := <-resultCh:
 			err := s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:            pipelineId,
 					UserId:        userId,
@@ -188,10 +189,10 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStream")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("pipeline_id", req.PipelineId),
-		log.String("user_id", req.UserId),
-		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	span.LogKV(
+		"pipeline_id", req.PipelineId,
+		"user_id", req.UserId,
+		"stream_id", fmt.Sprintf("%d", req.StreamId),
 	)
 
 	transactOpts, err := s.getManagerTransactOpts(ctx)
@@ -230,6 +231,7 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 		case err := <-errCh:
 			s.logger.Error(err)
 			err = s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:     pipelineId,
 					UserId: userId,
@@ -241,6 +243,7 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 			return
 		case e := <-resultCh:
 			err := s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:       pipelineId,
 					UserId:   userId,
@@ -261,10 +264,10 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("pipeline_id", req.PipelineId),
-		log.String("user_id", req.UserId),
-		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	span.LogKV(
+		"pipeline_id", req.PipelineId,
+		"user_id", req.UserId,
+		"stream_id", fmt.Sprintf("%d", req.StreamId),
 	)
 
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
@@ -300,6 +303,7 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 		case err := <-errCh:
 			s.logger.Error(err)
 			err = s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:     pipelineId,
 					UserId: userId,
@@ -311,6 +315,7 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 			return
 		case e := <-resultCh:
 			err := s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:            pipelineId,
 					UserId:        userId,
@@ -332,10 +337,10 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
-	span.LogFields(
-		log.String("pipeline_id", req.PipelineId),
-		log.String("user_id", req.UserId),
-		log.String("stream_id", fmt.Sprintf("%d", req.StreamId)),
+	span.LogKV(
+		"pipeline_id", req.PipelineId,
+		"user_id", req.UserId,
+		"stream_id", fmt.Sprintf("%d", req.StreamId),
 	)
 
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
@@ -367,6 +372,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 		case err := <-errCh:
 			s.logger.Error(err)
 			err = s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:     pipelineId,
 					UserId: userId,
@@ -378,6 +384,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 			return
 		case e := <-resultCh:
 			err := s.eb.UpdatePipelineStatus(
+				span,
 				&pipelinesv1.UpdatePipelineRequest{
 					Id:       pipelineId,
 					UserId:   userId,
@@ -395,6 +402,9 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 }
 
 func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*bind.TransactOpts, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "getClientTransactOpts")
+	defer span.Finish()
+
 	keyReq := &accountsv1.AccountRequest{OwnerId: userID}
 	key, err := s.accounts.Key(ctx, keyReq)
 	if err != nil {
@@ -418,6 +428,9 @@ func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*
 }
 
 func (s *RpcServer) getManagerTransactOpts(ctx context.Context) (*bind.TransactOpts, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "getManagerTransactOpts")
+	defer span.Finish()
+
 	decrypted, err := keystore.DecryptKey([]byte(s.mKey), s.mSecret)
 	if err != nil {
 		return nil, err
