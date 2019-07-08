@@ -9,7 +9,11 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
-	github.com/videocoin/cloud-api v0.0.17
+	github.com/videocoin/cloud-api v0.1.131
 	github.com/videocoin/cloud-pkg v0.0.0-20190612184810-e59f864191f6
 	google.golang.org/grpc v1.21.1
 )
+
+replace github.com/videocoin/cloud-api => ../cloud-api
+
+replace github.com/videocoin/cloud-pkg => ../cloud-pkg

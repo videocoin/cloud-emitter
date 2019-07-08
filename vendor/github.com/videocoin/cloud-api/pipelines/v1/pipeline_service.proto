@@ -5,6 +5,7 @@ package cloud.api.pipelines.v1;
 import "pipelines/v1/pipeline.proto";
 import "github.com/videocoin/cloud-api/rpc/health.proto";
 import "github.com/videocoin/cloud-api/profiles/v1/profiles.proto";
+import "github.com/videocoin/cloud-api/jobs/v1/job.proto";
 
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
@@ -31,27 +32,15 @@ service PipelineService {
         };
     }
 
-    rpc Delete(PipelineRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            delete: "/api/v1/pipelines/{id}",
-        };
-    }
-
-    rpc Get(PipelineRequest) returns (PipelineProfile) {
-        option (google.api.http) = {
-            get: "/api/v1/pipelines/{id}"
-        };
-    }
-
-    rpc GetByAccessCode(PipelineRequest) returns (PipelineProfile) {
-        option (google.api.http) = {
-            get: "/api/v1/pipelines/code/{id}"
-        };
-    }
-
     rpc List(google.protobuf.Empty) returns (ListResponse) {
         option (google.api.http) = {
             get: "/api/v1/pipelines"
+        };
+    }
+
+    rpc Delete(PipelineRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/pipelines/{id}",
         };
     }
 
@@ -62,23 +51,41 @@ service PipelineService {
         };
     }
 
-    rpc Run(PipelineRequest) returns (PipelineProfile) {
+    rpc Get(PipelineRequest) returns (PipelineProfile) {
         option (google.api.http) = {
-            post: "/api/v1/pipelines/{id}/run",
+            get: "/api/v1/pipelines/{id}"
+        };
+    }
+
+    rpc CreateStream(PipelineRequest) returns (cloud.api.jobs.v1.JobProfile) {
+        option (google.api.http) = {
+            post: "/api/v1/pipelines/{id}/streams",
             body: "*"
         };
     }
 
-    rpc Complete(PipelineRequest) returns (PipelineProfile) {
+    rpc DeleteStream(PipelineRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/api/v1/pipelines/{id}/complete",
+            delete: "/api/v1/pipelines/{id}/streams/{stream_id}"
+        };
+    }
+
+    rpc GetStreams(PipelineRequest) returns (cloud.api.jobs.v1.JobProfiles) {
+        option (google.api.http) = {
+            get: "/api/v1/pipelines/{id}/streams"
+        };
+    }
+
+    rpc RunStream(PipelineRequest) returns (cloud.api.jobs.v1.JobProfile) {
+        option (google.api.http) = {
+            post: "/api/v1/pipelines/{id}/streams/{stream_id}/run",
             body: "*"
         };
     }
 
-    rpc Cancel(PipelineRequest) returns (PipelineProfile) {
+    rpc CancelStream(PipelineRequest) returns (cloud.api.jobs.v1.JobProfile) {
         option (google.api.http) = {
-            post: "/api/v1/pipelines/{id}/cancel",
+            post: "/api/v1/pipelines/{id}/streams/{stream_id}/cancel",
             body: "*"
         };
     }
@@ -91,7 +98,7 @@ message CreatePipelineRequest {
 
 message PipelineRequest {
     string id = 1;
-    string access_code = 2;
+    string stream_id = 2;
 }
 
 message ListResponse {
@@ -100,11 +107,16 @@ message ListResponse {
 
 message UpdatePipelineRequest {
     string id = 1;
-    string user_id = 2;
-    string name = 4;
-    string client_address = 5;
-    uint64 stream_id = 6;
-    string stream_address = 7;
-    PipelineStatus status = 8;
-    cloud.api.profiles.v1.ProfileId profile_id = 9;
+    string name = 2;
+    cloud.api.profiles.v1.ProfileId profile_id = 3;
+}
+
+message UpdatePipelineStreamRequest {
+    string pipeline_id = 1;
+    string job_id = 2;
+    string user_id = 3;
+    string client_address = 4;
+    uint64 stream_id = 5;
+    string stream_address = 6;
+    PipelineStreamStatus status = 7;
 }

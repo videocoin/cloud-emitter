@@ -31,7 +31,8 @@ service EmitterService {
 
 message StreamRequest {
     string pipeline_id = 1;
-    string user_id = 2;
-    uint64 stream_id = 3;
-    string client_address = 4;
+    string job_id = 2;
+    string user_id = 3;
+    uint64 stream_id = 4;
+    string client_address = 5;
 }

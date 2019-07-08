@@ -12,6 +12,11 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+const (
+	FromMemory = iota
+	FromFile
+)
+
 // GetBCAuth initialize block chain auth with private key
 func GetBCAuth(client *ethclient.Client, privKey *keystore.Key) (*bind.TransactOpts, error) {
 	gasPrice, err := client.SuggestGasPrice(context.Background())
@@ -38,13 +43,26 @@ func GetBCAuth(client *ethclient.Client, privKey *keystore.Key) (*bind.TransactO
 
 // LoadBcPrivKeys loads blockchain private keys
 // Used in all cloud-blockchain communication
-func LoadBcPrivKeys(filename string, password string) (*keystore.Key, error) {
-	encrypted, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
+// Accepts path to file or json string
+func LoadBcPrivKeys(src string, password string, opt int) (*keystore.Key, error) {
+
+	var (
+		encrypted = make([]byte, 0)
+		decrypted = new(keystore.Key)
+		err       error
+	)
+
+	switch opt {
+	case FromMemory:
+		encrypted = []byte(src)
+	default:
+		encrypted, err = ioutil.ReadFile(src)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	decrypted, err := keystore.DecryptKey(encrypted, password)
+	decrypted, err = keystore.DecryptKey(encrypted, password)
 	if err != nil {
 		return nil, err
 	}

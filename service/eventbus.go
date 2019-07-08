@@ -1,12 +1,12 @@
 package service
 
 import (
-	pipelinesv1 "github.com/videocoin/cloud-api/pipelines/v1"
-	"github.com/videocoin/cloud-pkg/mqmux"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	pipelinesv1 "github.com/videocoin/cloud-api/pipelines/v1"
+	"github.com/videocoin/cloud-pkg/mqmux"
 )
 
 type EventBus struct {
@@ -52,8 +52,8 @@ func (e *EventBus) registerConsumers() error {
 	return nil
 }
 
-func (e *EventBus) UpdatePipelineStatus(span opentracing.Span, req *pipelinesv1.UpdatePipelineRequest) error {
-	e.logger.Infof("sending pipeline update: %v", req)
+func (e *EventBus) UpdatePipelineStreamStatus(span opentracing.Span, req *pipelinesv1.UpdatePipelineStreamRequest) error {
+	e.logger.Infof("sending pipeline stream update: %v", req)
 
 	headers := make(amqp.Table)
 

@@ -116,6 +116,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 	defer span.Finish()
 
 	span.LogKV(
+		"job_id", req.JobId,
 		"pipeline_id", req.PipelineId,
 		"user_id", req.UserId,
 		"stream_id", fmt.Sprintf("%d", req.StreamId),
@@ -129,6 +130,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 
 	userId := req.UserId
 	pipelineId := req.PipelineId
+	jobId := req.JobId
 	streamId := big.NewInt(int64(req.StreamId))
 	clientAddress := transactOpts.From
 
@@ -153,27 +155,29 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		select {
 		case err := <-errCh:
 			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStatus(
+			err = s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:     pipelineId,
-					UserId: userId,
-					Status: pipelinesv1.PipelineStatusFailed,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:      jobId,
+					PipelineId: pipelineId,
+					UserId:     userId,
+					Status:     pipelinesv1.PipelineStreamStatusFailed,
 				})
 			if err != nil {
 				s.logger.Error(err)
 			}
 			return
 		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStatus(
+			err := s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:            pipelineId,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:         jobId,
+					PipelineId:    pipelineId,
 					UserId:        userId,
 					StreamId:      e.StreamID.Uint64(),
 					StreamAddress: e.StreamAddress.Hex(),
 					ClientAddress: e.Address.Hex(),
-					Status:        pipelinesv1.PipelineStatusApprovePending,
+					Status:        pipelinesv1.PipelineStreamStatusApprovePending,
 				})
 			if err != nil {
 				s.logger.Error(err)
@@ -203,6 +207,7 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 
 	userId := req.UserId
 	pipelineId := req.PipelineId
+	jobId := req.JobId
 	streamId := new(big.Int).SetUint64(req.StreamId)
 
 	go func(context.Context) {
@@ -230,25 +235,27 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 		select {
 		case err := <-errCh:
 			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStatus(
+			err = s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:     pipelineId,
-					UserId: userId,
-					Status: pipelinesv1.PipelineStatusFailed,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:      jobId,
+					PipelineId: pipelineId,
+					UserId:     userId,
+					Status:     pipelinesv1.PipelineStreamStatusFailed,
 				})
 			if err != nil {
 				s.logger.Error(err)
 			}
 			return
 		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStatus(
+			err := s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:       pipelineId,
-					UserId:   userId,
-					StreamId: e.StreamID.Uint64(),
-					Status:   pipelinesv1.PipelineStatusCreatePending,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:      jobId,
+					PipelineId: pipelineId,
+					UserId:     userId,
+					StreamId:   e.StreamID.Uint64(),
+					Status:     pipelinesv1.PipelineStreamStatusCreatePending,
 				})
 			if err != nil {
 				s.logger.Error(err)
@@ -277,6 +284,7 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 	}
 
 	userId := req.UserId
+	jobId := req.JobId
 	pipelineId := req.PipelineId
 	streamId := new(big.Int).SetUint64(req.StreamId)
 
@@ -302,26 +310,28 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 		select {
 		case err := <-errCh:
 			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStatus(
+			err = s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:     pipelineId,
-					UserId: userId,
-					Status: pipelinesv1.PipelineStatusFailed,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:      jobId,
+					PipelineId: pipelineId,
+					UserId:     userId,
+					Status:     pipelinesv1.PipelineStreamStatusFailed,
 				})
 			if err != nil {
 				s.logger.Error(err)
 			}
 			return
 		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStatus(
+			err := s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:            pipelineId,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:         jobId,
+					PipelineId:    pipelineId,
 					UserId:        userId,
 					StreamId:      e.StreamID.Uint64(),
 					StreamAddress: e.StreamAddress.Hex(),
-					Status:        pipelinesv1.PipelineStatusJobPending,
+					Status:        pipelinesv1.PipelineStreamStatusRunPending,
 				})
 			if err != nil {
 				s.logger.Error(err)
@@ -351,6 +361,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 
 	userId := req.UserId
 	pipelineId := req.PipelineId
+	jobId := req.JobId
 	streamId := new(big.Int).SetUint64(req.StreamId)
 
 	go func(context.Context) {
@@ -371,25 +382,27 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 		select {
 		case err := <-errCh:
 			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStatus(
+			err = s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:     pipelineId,
-					UserId: userId,
-					Status: pipelinesv1.PipelineStatusFailed,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:      jobId,
+					PipelineId: pipelineId,
+					UserId:     userId,
+					Status:     pipelinesv1.PipelineStreamStatusFailed,
 				})
 			if err != nil {
 				s.logger.Error(err)
 			}
 			return
 		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStatus(
+			err := s.eb.UpdatePipelineStreamStatus(
 				span,
-				&pipelinesv1.UpdatePipelineRequest{
-					Id:       pipelineId,
-					UserId:   userId,
-					StreamId: e.StreamID.Uint64(),
-					Status:   pipelinesv1.PipelineStatusIdle,
+				&pipelinesv1.UpdatePipelineStreamRequest{
+					JobId:      jobId,
+					PipelineId: pipelineId,
+					UserId:     userId,
+					StreamId:   e.StreamID.Uint64(),
+					Status:     pipelinesv1.PipelineStreamStatusCompleted,
 				})
 			if err != nil {
 				s.logger.Error(err)
@@ -428,7 +441,7 @@ func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*
 }
 
 func (s *RpcServer) getManagerTransactOpts(ctx context.Context) (*bind.TransactOpts, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "getManagerTransactOpts")
+	span, _ := opentracing.StartSpanFromContext(ctx, "getManagerTransactOpts")
 	defer span.Finish()
 
 	decrypted, err := keystore.DecryptKey([]byte(s.mKey), s.mSecret)
