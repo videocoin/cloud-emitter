@@ -115,12 +115,10 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
 	defer span.Finish()
 
-	span.LogKV(
-		"job_id", req.JobId,
-		"pipeline_id", req.PipelineId,
-		"user_id", req.UserId,
-		"stream_id", fmt.Sprintf("%d", req.StreamId),
-	)
+	span.SetTag("job_id", req.JobId)
+	span.SetTag("pipeline_id", req.PipelineId)
+	span.SetTag("user_id", req.UserId)
+	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
@@ -193,11 +191,9 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStream")
 	defer span.Finish()
 
-	span.LogKV(
-		"pipeline_id", req.PipelineId,
-		"user_id", req.UserId,
-		"stream_id", fmt.Sprintf("%d", req.StreamId),
-	)
+	span.SetTag("pipeline_id", req.PipelineId)
+	span.SetTag("user_id", req.UserId)
+	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
 	transactOpts, err := s.getManagerTransactOpts(ctx)
 	if err != nil {
@@ -271,11 +267,9 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
 	defer span.Finish()
 
-	span.LogKV(
-		"pipeline_id", req.PipelineId,
-		"user_id", req.UserId,
-		"stream_id", fmt.Sprintf("%d", req.StreamId),
-	)
+	span.SetTag("pipeline_id", req.PipelineId)
+	span.SetTag("user_id", req.UserId)
+	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {
@@ -347,11 +341,9 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
-	span.LogKV(
-		"pipeline_id", req.PipelineId,
-		"user_id", req.UserId,
-		"stream_id", fmt.Sprintf("%d", req.StreamId),
-	)
+	span.SetTag("pipeline_id", req.PipelineId)
+	span.SetTag("user_id", req.UserId)
+	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
 	transactOpts, err := s.getClientTransactOpts(ctx, req.UserId)
 	if err != nil {

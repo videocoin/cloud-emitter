@@ -38,10 +38,8 @@ func (e *EventListener) LogStreamRequestEvent(ctx context.Context, streamID *big
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogStreamRequestEvent")
 	defer span.Finish()
 
-	span.LogKV(
-		"address", address.Hex(),
-		"stream_id", streamID.String(),
-	)
+	span.SetTag("address", address.Hex())
+	span.SetTag("stream_id", streamID.String())
 
 	addresses := []common.Address{address}
 	streamIDs := []*big.Int{streamID}
@@ -129,7 +127,7 @@ func (e *EventListener) LogStreamCreateEvent(ctx context.Context, streamID *big.
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogStreamCreateEvent")
 	defer span.Finish()
 
-	span.LogKV("stream_id", streamID.String())
+	span.SetTag("stream_id", streamID.String())
 
 	streamAddresses := []common.Address{}
 	streamIDs := []*big.Int{streamID}
@@ -219,7 +217,7 @@ func (e *EventListener) LogStreamApproveEvent(ctx context.Context, streamID *big
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogStreamApproveEvent")
 	defer span.Finish()
 
-	span.LogKV("stream_id", streamID.String())
+	span.SetTag("stream_id", streamID.String())
 
 	streamIDs := []*big.Int{streamID}
 
@@ -301,10 +299,8 @@ func (e *EventListener) LogInputChunkAddEvent(ctx context.Context, streamID *big
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogInputChunkAddEvent")
 	defer span.Finish()
 
-	span.LogKV(
-		"stream_id", streamID.String(),
-		"chunk_id", chunkID.String(),
-	)
+	span.SetTag("stream_id", streamID.String())
+	span.SetTag("chunk_id", chunkID.String())
 
 	streamIDs := []*big.Int{streamID}
 	chunkIDs := []*big.Int{chunkID}
@@ -394,10 +390,8 @@ func (e *EventListener) LogEndStreamEvent(ctx context.Context, streamID *big.Int
 	span, ctx := opentracing.StartSpanFromContext(ctx, "LogEndStreamEvent")
 	defer span.Finish()
 
-	span.LogKV(
-		"stream_id", streamID.String(),
-		"address", address.Hex(),
-	)
+	span.SetTag("stream_id", streamID.String())
+	span.SetTag("address", address.Hex())
 
 	streamIDs := []*big.Int{streamID}
 	caller := []common.Address{address}
