@@ -2,6 +2,7 @@ package service
 
 import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
+	managerv1 "github.com/videocoin/cloud-api/manager/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-pkg/mqmux"
 	"google.golang.org/grpc"
@@ -23,6 +24,13 @@ func NewService(cfg *Config) (*Service, error) {
 
 	accounts := accountsv1.NewAccountServiceClient(accountsConn)
 
+	managerConn, err := grpc.Dial(cfg.ManagerRPCAddr, aGrpcDialOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	manager := managerv1.NewManagerServiceClient(managerConn)
+
 	mq, err := mqmux.NewWorkerMux(cfg.MQURI, cfg.Name)
 	if err != nil {
 		return nil, err
@@ -42,6 +50,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Logger:       cfg.Logger,
 		EB:           eb,
 		Accounts:     accounts,
+		Manager:      manager,
 		Secret:       cfg.Secret,
 		MKey:         cfg.MKey,
 		MSecret:      cfg.MSecret,

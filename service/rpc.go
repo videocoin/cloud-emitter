@@ -10,11 +10,13 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/gogo/protobuf/types"
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
+	managerv1 "github.com/videocoin/cloud-api/manager/v1"
 	pipelinesv1 "github.com/videocoin/cloud-api/pipelines/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	"github.com/videocoin/cloud-pkg/bcops"
@@ -30,6 +32,7 @@ type RpcServerOptions struct {
 	ContractAddr string
 	Logger       *logrus.Entry
 	Accounts     accountsv1.AccountServiceClient
+	Manager      managerv1.ManagerServiceClient
 	EB           *EventBus
 
 	Secret  string
@@ -45,6 +48,7 @@ type RpcServer struct {
 	logger        *logrus.Entry
 	eb            *EventBus
 	accounts      accountsv1.AccountServiceClient
+	manager       managerv1.ManagerServiceClient
 	ethClient     *ethclient.Client
 	streamManager *sm.Manager
 	eventListener *EventListener
@@ -88,6 +92,7 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 		logger:        opts.Logger,
 		eb:            opts.EB,
 		accounts:      opts.Accounts,
+		manager:       opts.Manager,
 		ethClient:     ethClient,
 		streamManager: manager,
 		eventListener: eventListener,
@@ -132,6 +137,16 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 	streamId := big.NewInt(int64(req.StreamId))
 	clientAddress := transactOpts.From
 
+	profiles, err := s.manager.GetProfiles(context.Background(), new(types.Empty))
+	if err != nil {
+		return nil, err
+	}
+
+	pNames := make([]string, 0)
+	for _, p := range profiles.Profiles {
+		pNames = append(pNames, p.Name)
+	}
+
 	go func(ctx context.Context) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStreamAsync")
 		defer span.Finish()
@@ -140,8 +155,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		_, err = s.streamManager.RequestStream(
 			transactOpts,
 			streamId,
-			"videocoin",
-			[]*big.Int{big.NewInt(0), big.NewInt(1), big.NewInt(2)},
+			pNames,
 		)
 		if err != nil {
 			s.logger.Errorf("failed to request stream: %s", err)
@@ -220,7 +234,6 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 		_, err = s.streamManager.ApproveStreamCreation(
 			transactOpts,
 			streamId,
-			nil,
 		)
 		if err != nil {
 			s.logger.Errorf("failed to approve stream: %s", err)

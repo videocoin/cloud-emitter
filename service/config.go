@@ -10,6 +10,7 @@ type Config struct {
 
 	RPCAddr         string `default:"0.0.0.0:5003"`
 	AccountsRPCAddr string `default:"0.0.0.0:5001"`
+	ManagerRPCAddr  string `default:"0.0.0.0:50051"`
 
 	MQURI string `default:"amqp://guest:guest@127.0.0.1:5672" envconfig:"MQURI"`
 
