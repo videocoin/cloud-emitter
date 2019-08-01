@@ -1,7 +1,7 @@
 // Code generated - DO NOT EDIT.
 // This file is a generated binding and any manual changes will be lost.
 
-package streamManager
+package manager
 
 import (
 	"math/big"
@@ -28,7 +28,7 @@ var (
 )
 
 // ManagerABI is the input ABI used to generate the binding from.
-const ManagerABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"},{\"name\":\"chunkId\",\"type\":\"uint256\"}],\"name\":\"addInputChunkId\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"refundAllowed\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"allowRefund\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"v\",\"type\":\"address\"}],\"name\":\"removeValidator\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"revokeRefund\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"v\",\"type\":\"address\"}],\"name\":\"addValidator\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"endStream\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"createStream\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"},{\"name\":\"chunks\",\"type\":\"uint256[]\"}],\"name\":\"approveStreamCreation\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"requests\",\"outputs\":[{\"name\":\"approved\",\"type\":\"bool\"},{\"name\":\"refund\",\"type\":\"bool\"},{\"name\":\"ended\",\"type\":\"bool\"},{\"name\":\"client\",\"type\":\"address\"},{\"name\":\"stream\",\"type\":\"address\"},{\"name\":\"streamId\",\"type\":\"uint256\"},{\"name\":\"RTMP\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"},{\"name\":\"RTMP\",\"type\":\"string\"},{\"name\":\"bitrates\",\"type\":\"uint256[]\"}],\"name\":\"requestStream\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"v\",\"type\":\"address\"}],\"name\":\"isValidator\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"StreamRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"StreamApproved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"StreamCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"ValidatorAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"ValidatorRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"RefundAllowed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"RefundRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"chunkId\",\"type\":\"uint256\"}],\"name\":\"InputChunkAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"caller\",\"type\":\"address\"}],\"name\":\"StreamEnded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"}]"
+const ManagerABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"refundAllowed\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"allowRefund\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"},{\"name\":\"profileNames\",\"type\":\"string[]\"}],\"name\":\"requestStream\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"v\",\"type\":\"address\"}],\"name\":\"removeValidator\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"revokeRefund\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"v\",\"type\":\"address\"}],\"name\":\"addValidator\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"endStream\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"createStream\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"requests\",\"outputs\":[{\"name\":\"approved\",\"type\":\"bool\"},{\"name\":\"refund\",\"type\":\"bool\"},{\"name\":\"ended\",\"type\":\"bool\"},{\"name\":\"client\",\"type\":\"address\"},{\"name\":\"stream\",\"type\":\"address\"},{\"name\":\"streamId\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"},{\"name\":\"chunkId\",\"type\":\"uint256\"},{\"name\":\"wattages\",\"type\":\"uint256[]\"}],\"name\":\"addInputChunkId\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"profiles\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"approveStreamCreation\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"v\",\"type\":\"address\"}],\"name\":\"isValidator\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"StreamRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"StreamApproved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"StreamCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"ValidatorAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"ValidatorRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"RefundAllowed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"}],\"name\":\"RefundRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"chunkId\",\"type\":\"uint256\"}],\"name\":\"InputChunkAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"streamId\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"caller\",\"type\":\"address\"}],\"name\":\"StreamEnded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"}]"
 
 // Manager is an auto generated Go binding around an Ethereum contract.
 type Manager struct {
@@ -250,6 +250,32 @@ func (_Manager *ManagerCallerSession) Owner() (common.Address, error) {
 	return _Manager.Contract.Owner(&_Manager.CallOpts)
 }
 
+// Profiles is a free data retrieval call binding the contract method 0xc36fe3d6.
+//
+// Solidity: function profiles(uint256 ) constant returns(string)
+func (_Manager *ManagerCaller) Profiles(opts *bind.CallOpts, arg0 *big.Int) (string, error) {
+	var (
+		ret0 = new(string)
+	)
+	out := ret0
+	err := _Manager.contract.Call(opts, out, "profiles", arg0)
+	return *ret0, err
+}
+
+// Profiles is a free data retrieval call binding the contract method 0xc36fe3d6.
+//
+// Solidity: function profiles(uint256 ) constant returns(string)
+func (_Manager *ManagerSession) Profiles(arg0 *big.Int) (string, error) {
+	return _Manager.Contract.Profiles(&_Manager.CallOpts, arg0)
+}
+
+// Profiles is a free data retrieval call binding the contract method 0xc36fe3d6.
+//
+// Solidity: function profiles(uint256 ) constant returns(string)
+func (_Manager *ManagerCallerSession) Profiles(arg0 *big.Int) (string, error) {
+	return _Manager.Contract.Profiles(&_Manager.CallOpts, arg0)
+}
+
 // RefundAllowed is a free data retrieval call binding the contract method 0x0f514717.
 //
 // Solidity: function refundAllowed(uint256 streamId) constant returns(bool)
@@ -278,7 +304,7 @@ func (_Manager *ManagerCallerSession) RefundAllowed(streamId *big.Int) (bool, er
 
 // Requests is a free data retrieval call binding the contract method 0x81d12c58.
 //
-// Solidity: function requests(uint256 ) constant returns(bool approved, bool refund, bool ended, address client, address stream, uint256 streamId, string RTMP)
+// Solidity: function requests(uint256 ) constant returns(bool approved, bool refund, bool ended, address client, address stream, uint256 streamId)
 func (_Manager *ManagerCaller) Requests(opts *bind.CallOpts, arg0 *big.Int) (struct {
 	Approved bool
 	Refund   bool
@@ -286,7 +312,6 @@ func (_Manager *ManagerCaller) Requests(opts *bind.CallOpts, arg0 *big.Int) (str
 	Client   common.Address
 	Stream   common.Address
 	StreamId *big.Int
-	RTMP     string
 }, error) {
 	ret := new(struct {
 		Approved bool
@@ -295,7 +320,6 @@ func (_Manager *ManagerCaller) Requests(opts *bind.CallOpts, arg0 *big.Int) (str
 		Client   common.Address
 		Stream   common.Address
 		StreamId *big.Int
-		RTMP     string
 	})
 	out := ret
 	err := _Manager.contract.Call(opts, out, "requests", arg0)
@@ -304,7 +328,7 @@ func (_Manager *ManagerCaller) Requests(opts *bind.CallOpts, arg0 *big.Int) (str
 
 // Requests is a free data retrieval call binding the contract method 0x81d12c58.
 //
-// Solidity: function requests(uint256 ) constant returns(bool approved, bool refund, bool ended, address client, address stream, uint256 streamId, string RTMP)
+// Solidity: function requests(uint256 ) constant returns(bool approved, bool refund, bool ended, address client, address stream, uint256 streamId)
 func (_Manager *ManagerSession) Requests(arg0 *big.Int) (struct {
 	Approved bool
 	Refund   bool
@@ -312,14 +336,13 @@ func (_Manager *ManagerSession) Requests(arg0 *big.Int) (struct {
 	Client   common.Address
 	Stream   common.Address
 	StreamId *big.Int
-	RTMP     string
 }, error) {
 	return _Manager.Contract.Requests(&_Manager.CallOpts, arg0)
 }
 
 // Requests is a free data retrieval call binding the contract method 0x81d12c58.
 //
-// Solidity: function requests(uint256 ) constant returns(bool approved, bool refund, bool ended, address client, address stream, uint256 streamId, string RTMP)
+// Solidity: function requests(uint256 ) constant returns(bool approved, bool refund, bool ended, address client, address stream, uint256 streamId)
 func (_Manager *ManagerCallerSession) Requests(arg0 *big.Int) (struct {
 	Approved bool
 	Refund   bool
@@ -327,30 +350,29 @@ func (_Manager *ManagerCallerSession) Requests(arg0 *big.Int) (struct {
 	Client   common.Address
 	Stream   common.Address
 	StreamId *big.Int
-	RTMP     string
 }, error) {
 	return _Manager.Contract.Requests(&_Manager.CallOpts, arg0)
 }
 
-// AddInputChunkId is a paid mutator transaction binding the contract method 0x0a8c4c13.
+// AddInputChunkId is a paid mutator transaction binding the contract method 0xb56b9f16.
 //
-// Solidity: function addInputChunkId(uint256 streamId, uint256 chunkId) returns()
-func (_Manager *ManagerTransactor) AddInputChunkId(opts *bind.TransactOpts, streamId *big.Int, chunkId *big.Int) (*types.Transaction, error) {
-	return _Manager.contract.Transact(opts, "addInputChunkId", streamId, chunkId)
+// Solidity: function addInputChunkId(uint256 streamId, uint256 chunkId, uint256[] wattages) returns()
+func (_Manager *ManagerTransactor) AddInputChunkId(opts *bind.TransactOpts, streamId *big.Int, chunkId *big.Int, wattages []*big.Int) (*types.Transaction, error) {
+	return _Manager.contract.Transact(opts, "addInputChunkId", streamId, chunkId, wattages)
 }
 
-// AddInputChunkId is a paid mutator transaction binding the contract method 0x0a8c4c13.
+// AddInputChunkId is a paid mutator transaction binding the contract method 0xb56b9f16.
 //
-// Solidity: function addInputChunkId(uint256 streamId, uint256 chunkId) returns()
-func (_Manager *ManagerSession) AddInputChunkId(streamId *big.Int, chunkId *big.Int) (*types.Transaction, error) {
-	return _Manager.Contract.AddInputChunkId(&_Manager.TransactOpts, streamId, chunkId)
+// Solidity: function addInputChunkId(uint256 streamId, uint256 chunkId, uint256[] wattages) returns()
+func (_Manager *ManagerSession) AddInputChunkId(streamId *big.Int, chunkId *big.Int, wattages []*big.Int) (*types.Transaction, error) {
+	return _Manager.Contract.AddInputChunkId(&_Manager.TransactOpts, streamId, chunkId, wattages)
 }
 
-// AddInputChunkId is a paid mutator transaction binding the contract method 0x0a8c4c13.
+// AddInputChunkId is a paid mutator transaction binding the contract method 0xb56b9f16.
 //
-// Solidity: function addInputChunkId(uint256 streamId, uint256 chunkId) returns()
-func (_Manager *ManagerTransactorSession) AddInputChunkId(streamId *big.Int, chunkId *big.Int) (*types.Transaction, error) {
-	return _Manager.Contract.AddInputChunkId(&_Manager.TransactOpts, streamId, chunkId)
+// Solidity: function addInputChunkId(uint256 streamId, uint256 chunkId, uint256[] wattages) returns()
+func (_Manager *ManagerTransactorSession) AddInputChunkId(streamId *big.Int, chunkId *big.Int, wattages []*big.Int) (*types.Transaction, error) {
+	return _Manager.Contract.AddInputChunkId(&_Manager.TransactOpts, streamId, chunkId, wattages)
 }
 
 // AddValidator is a paid mutator transaction binding the contract method 0x4d238c8e.
@@ -395,25 +417,25 @@ func (_Manager *ManagerTransactorSession) AllowRefund(streamId *big.Int) (*types
 	return _Manager.Contract.AllowRefund(&_Manager.TransactOpts, streamId)
 }
 
-// ApproveStreamCreation is a paid mutator transaction binding the contract method 0x70bdecb6.
+// ApproveStreamCreation is a paid mutator transaction binding the contract method 0xecf9ac74.
 //
-// Solidity: function approveStreamCreation(uint256 streamId, uint256[] chunks) returns()
-func (_Manager *ManagerTransactor) ApproveStreamCreation(opts *bind.TransactOpts, streamId *big.Int, chunks []*big.Int) (*types.Transaction, error) {
-	return _Manager.contract.Transact(opts, "approveStreamCreation", streamId, chunks)
+// Solidity: function approveStreamCreation(uint256 streamId) returns()
+func (_Manager *ManagerTransactor) ApproveStreamCreation(opts *bind.TransactOpts, streamId *big.Int) (*types.Transaction, error) {
+	return _Manager.contract.Transact(opts, "approveStreamCreation", streamId)
 }
 
-// ApproveStreamCreation is a paid mutator transaction binding the contract method 0x70bdecb6.
+// ApproveStreamCreation is a paid mutator transaction binding the contract method 0xecf9ac74.
 //
-// Solidity: function approveStreamCreation(uint256 streamId, uint256[] chunks) returns()
-func (_Manager *ManagerSession) ApproveStreamCreation(streamId *big.Int, chunks []*big.Int) (*types.Transaction, error) {
-	return _Manager.Contract.ApproveStreamCreation(&_Manager.TransactOpts, streamId, chunks)
+// Solidity: function approveStreamCreation(uint256 streamId) returns()
+func (_Manager *ManagerSession) ApproveStreamCreation(streamId *big.Int) (*types.Transaction, error) {
+	return _Manager.Contract.ApproveStreamCreation(&_Manager.TransactOpts, streamId)
 }
 
-// ApproveStreamCreation is a paid mutator transaction binding the contract method 0x70bdecb6.
+// ApproveStreamCreation is a paid mutator transaction binding the contract method 0xecf9ac74.
 //
-// Solidity: function approveStreamCreation(uint256 streamId, uint256[] chunks) returns()
-func (_Manager *ManagerTransactorSession) ApproveStreamCreation(streamId *big.Int, chunks []*big.Int) (*types.Transaction, error) {
-	return _Manager.Contract.ApproveStreamCreation(&_Manager.TransactOpts, streamId, chunks)
+// Solidity: function approveStreamCreation(uint256 streamId) returns()
+func (_Manager *ManagerTransactorSession) ApproveStreamCreation(streamId *big.Int) (*types.Transaction, error) {
+	return _Manager.Contract.ApproveStreamCreation(&_Manager.TransactOpts, streamId)
 }
 
 // CreateStream is a paid mutator transaction binding the contract method 0x551479dd.
@@ -500,25 +522,25 @@ func (_Manager *ManagerTransactorSession) RenounceOwnership() (*types.Transactio
 	return _Manager.Contract.RenounceOwnership(&_Manager.TransactOpts)
 }
 
-// RequestStream is a paid mutator transaction binding the contract method 0x8562faa2.
+// RequestStream is a paid mutator transaction binding the contract method 0x2c29980c.
 //
-// Solidity: function requestStream(uint256 streamId, string RTMP, uint256[] bitrates) returns(uint256)
-func (_Manager *ManagerTransactor) RequestStream(opts *bind.TransactOpts, streamId *big.Int, RTMP string, bitrates []*big.Int) (*types.Transaction, error) {
-	return _Manager.contract.Transact(opts, "requestStream", streamId, RTMP, bitrates)
+// Solidity: function requestStream(uint256 streamId, string[] profileNames) returns(uint256)
+func (_Manager *ManagerTransactor) RequestStream(opts *bind.TransactOpts, streamId *big.Int, profileNames []string) (*types.Transaction, error) {
+	return _Manager.contract.Transact(opts, "requestStream", streamId, profileNames)
 }
 
-// RequestStream is a paid mutator transaction binding the contract method 0x8562faa2.
+// RequestStream is a paid mutator transaction binding the contract method 0x2c29980c.
 //
-// Solidity: function requestStream(uint256 streamId, string RTMP, uint256[] bitrates) returns(uint256)
-func (_Manager *ManagerSession) RequestStream(streamId *big.Int, RTMP string, bitrates []*big.Int) (*types.Transaction, error) {
-	return _Manager.Contract.RequestStream(&_Manager.TransactOpts, streamId, RTMP, bitrates)
+// Solidity: function requestStream(uint256 streamId, string[] profileNames) returns(uint256)
+func (_Manager *ManagerSession) RequestStream(streamId *big.Int, profileNames []string) (*types.Transaction, error) {
+	return _Manager.Contract.RequestStream(&_Manager.TransactOpts, streamId, profileNames)
 }
 
-// RequestStream is a paid mutator transaction binding the contract method 0x8562faa2.
+// RequestStream is a paid mutator transaction binding the contract method 0x2c29980c.
 //
-// Solidity: function requestStream(uint256 streamId, string RTMP, uint256[] bitrates) returns(uint256)
-func (_Manager *ManagerTransactorSession) RequestStream(streamId *big.Int, RTMP string, bitrates []*big.Int) (*types.Transaction, error) {
-	return _Manager.Contract.RequestStream(&_Manager.TransactOpts, streamId, RTMP, bitrates)
+// Solidity: function requestStream(uint256 streamId, string[] profileNames) returns(uint256)
+func (_Manager *ManagerTransactorSession) RequestStream(streamId *big.Int, profileNames []string) (*types.Transaction, error) {
+	return _Manager.Contract.RequestStream(&_Manager.TransactOpts, streamId, profileNames)
 }
 
 // RevokeRefund is a paid mutator transaction binding the contract method 0x4b51438c.

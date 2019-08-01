@@ -44,12 +44,27 @@ message Pipeline {
     ];
 }
 
+message PipelineListItem {
+    string id = 1;
+    string name = 2;
+
+    cloud.api.profiles.v1.ProfileId profile_id = 4;
+    
+    int32 streams_count = 5;
+    int32 streams_ready = 6;
+    int32 streams_pending = 7;
+
+    google.protobuf.Timestamp created_at = 10 [
+        (gogoproto.stdtime) = true
+    ];
+}
+
 message PipelineProfile {
     string id = 1;
     string name = 2;
     
     cloud.api.profiles.v1.ProfileId profile_id = 4;
-    cloud.api.jobs.v1.JobProfiles jobs = 5;
+    cloud.api.jobs.v1.JobProfiles streams = 5;
 
     google.protobuf.Timestamp created_at = 10 [
         (gogoproto.stdtime) = true

@@ -40,7 +40,7 @@ service PipelineService {
 
     rpc Delete(PipelineRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            delete: "/api/v1/pipelines/{id}",
+            delete: "/api/v1/pipelines/{pipeline_id}",
         };
     }
 
@@ -53,39 +53,45 @@ service PipelineService {
 
     rpc Get(PipelineRequest) returns (PipelineProfile) {
         option (google.api.http) = {
-            get: "/api/v1/pipelines/{id}"
+            get: "/api/v1/pipelines/{pipeline_id}"
         };
     }
 
-    rpc CreateStream(PipelineRequest) returns (cloud.api.jobs.v1.JobProfile) {
+    rpc ListStreams(PipelineRequest) returns (cloud.api.jobs.v1.JobProfiles) {
         option (google.api.http) = {
-            post: "/api/v1/pipelines/{id}/streams",
+            get: "/api/v1/pipelines/{pipeline_id}/streams"
+        };
+    }
+
+    rpc CreateStream(CreateStreamRequest) returns (cloud.api.jobs.v1.JobProfile) {
+        option (google.api.http) = {
+            post: "/api/v1/streams"
             body: "*"
         };
     }
 
-    rpc DeleteStream(PipelineRequest) returns (google.protobuf.Empty) {
+    rpc DeleteStream(StreamRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            delete: "/api/v1/pipelines/{id}/streams/{stream_id}"
+            delete: "/api/v1/streams/{stream_id}"
         };
     }
 
-    rpc GetStreams(PipelineRequest) returns (cloud.api.jobs.v1.JobProfiles) {
+    rpc GetStream(StreamRequest) returns (cloud.api.jobs.v1.JobProfile) {
         option (google.api.http) = {
-            get: "/api/v1/pipelines/{id}/streams"
+            get: "/api/v1/streams/{stream_id}"
         };
     }
 
-    rpc RunStream(PipelineRequest) returns (cloud.api.jobs.v1.JobProfile) {
+    rpc RunStream(StreamRequest) returns (cloud.api.jobs.v1.JobProfile) {
         option (google.api.http) = {
-            post: "/api/v1/pipelines/{id}/streams/{stream_id}/run",
+            post: "/api/v1/streams/{stream_id}/run"
             body: "*"
         };
     }
 
-    rpc CancelStream(PipelineRequest) returns (cloud.api.jobs.v1.JobProfile) {
+    rpc CancelStream(StreamRequest) returns (cloud.api.jobs.v1.JobProfile) {
         option (google.api.http) = {
-            post: "/api/v1/pipelines/{id}/streams/{stream_id}/cancel",
+            post: "/api/v1/streams/{stream_id}/cancel"
             body: "*"
         };
     }
@@ -97,12 +103,19 @@ message CreatePipelineRequest {
 }
 
 message PipelineRequest {
-    string id = 1;
-    string stream_id = 2;
+    string pipeline_id = 1;
+}
+
+message CreateStreamRequest {
+    string pipeline_id = 1;
+}
+
+message StreamRequest {
+    string stream_id = 1;
 }
 
 message ListResponse {
-    repeated PipelineProfile items = 1;
+    repeated PipelineListItem items = 1;
 }
 
 message UpdatePipelineRequest {

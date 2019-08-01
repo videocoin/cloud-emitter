@@ -65,7 +65,7 @@ message Job {
 }
 
 message Jobs {
-    repeated Job jobs = 1;
+    repeated Job items = 1;
 }
 
 
@@ -84,5 +84,5 @@ message JobProfile {
 }
 
 message JobProfiles {
-    repeated JobProfile job_profiles = 1;
+    repeated JobProfile items = 1;
 }
