@@ -4,7 +4,7 @@ readonly CHART_NAME=emitter
 readonly CHART_DIR=./deploy/helm
 
 CONSUL_ADDR=${CONSUL_ADDR:=127.0.0.1:8500}
-ENV=${ENV:=dev}
+ENV=${ENV:=thor}
 VERSION=${VERSION:=`git describe --abbrev=0`-`git rev-parse --short HEAD`}
 
 function log {
@@ -50,6 +50,7 @@ function get_vars() {
     log_info "Getting variables..."
     readonly KUBE_CONTEXT=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/common/kube_context`
     readonly ACCOUNTS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/accountsRpcAddr`
+    readonly MANAGER_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/managerRpcAddr`
     readonly MQ_URI=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/mqUri`
     readonly CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/contractAddr`
     readonly NODE_HTTP_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/nodeHttpAddr`
@@ -63,6 +64,7 @@ function get_vars_ci() {
     log_info "Getting ci variables..."
     readonly KUBE_CONTEXT=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/common/kube_context?raw`
     readonly ACCOUNTS_RPC_ADDR=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/vars/accountsRpcAddr?raw `
+    readonly MANAGER_RPC_ADDR=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/vars/managerRpcAddr?raw `
     readonly MQ_URI=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/mqUri?raw`
     readonly CONTRACT_ADDR=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/contractAddr?raw`
     readonly NODE_HTTP_ADDR=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/nodeHttpAddr?raw`
@@ -79,6 +81,7 @@ function deploy() {
         --install \
         --set image.tag="${VERSION}" \
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
+        --set config.managerRpcAddr="${MANAGER_RPC_ADDR}" \
         --set secrets.mqUri="${MQ_URI}" \
         --set secrets.contractAddr="${CONTRACT_ADDR}" \
         --set secrets.nodeHttpAddr="${NODE_HTTP_ADDR}" \

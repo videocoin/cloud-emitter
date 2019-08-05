@@ -37,6 +37,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: accountsRpcAddr
+            - name: EMITTER_MANAGER_RPC_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: managerRpcAddr
             - name: NODEHTTPADDR
               valueFrom:
                 secretKeyRef:

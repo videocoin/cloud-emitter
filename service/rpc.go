@@ -17,7 +17,6 @@ import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	managerv1 "github.com/videocoin/cloud-api/manager/v1"
-	pipelinesv1 "github.com/videocoin/cloud-api/pipelines/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	"github.com/videocoin/cloud-pkg/bcops"
 	"github.com/videocoin/cloud-pkg/grpcutil"
@@ -120,8 +119,6 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
 	defer span.Finish()
 
-	span.SetTag("job_id", req.JobId)
-	span.SetTag("pipeline_id", req.PipelineId)
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
@@ -131,11 +128,7 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		return nil, err
 	}
 
-	userId := req.UserId
-	pipelineId := req.PipelineId
-	jobId := req.JobId
-	streamId := big.NewInt(int64(req.StreamId))
-	clientAddress := transactOpts.From
+	streamID := big.NewInt(int64(req.StreamId))
 
 	profiles, err := s.manager.GetProfiles(context.Background(), new(types.Empty))
 	if err != nil {
@@ -147,57 +140,12 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		pNames = append(pNames, p.Name)
 	}
 
-	s.logger.Infof("request stream on stream id %d", streamId.Uint64())
+	s.logger.Infof("request stream on stream id %d", streamID.Uint64())
 	tx, err := s.streamManager.RequestStream(
 		transactOpts,
-		streamId,
+		streamID,
 		pNames,
 	)
-
-	go func(ctx context.Context) {
-		span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStreamAsync")
-		defer span.Finish()
-
-		if err != nil {
-			s.logger.Errorf("failed to request stream: %s", err)
-		}
-
-		resultCh, errCh := s.eventListener.LogStreamRequestEvent(ctx, streamId, clientAddress)
-
-		s.logger.Infof("log stream request event on stream id %d", streamId.Uint64())
-		select {
-		case err := <-errCh:
-			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:      jobId,
-					PipelineId: pipelineId,
-					UserId:     userId,
-					Status:     pipelinesv1.PipelineStreamStatusFailed,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:         jobId,
-					PipelineId:    pipelineId,
-					UserId:        userId,
-					StreamId:      e.StreamID.Uint64(),
-					StreamAddress: e.StreamAddress.Hex(),
-					ClientAddress: e.Address.Hex(),
-					Status:        pipelinesv1.PipelineStreamStatusApprovePending,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		}
-	}(ctx)
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
@@ -206,7 +154,6 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStream")
 	defer span.Finish()
 
-	span.SetTag("pipeline_id", req.PipelineId)
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
@@ -216,64 +163,19 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 		return nil, err
 	}
 
-	userId := req.UserId
-	pipelineId := req.PipelineId
-	jobId := req.JobId
-	streamId := new(big.Int).SetUint64(req.StreamId)
+	streamID := new(big.Int).SetUint64(req.StreamId)
 
-	s.logger.Infof("allow refund on stream id %d", streamId.Uint64())
-	_, err = s.streamManager.AllowRefund(transactOpts, streamId)
+	s.logger.Infof("allow refund on stream id %d", streamID.Uint64())
+	_, err = s.streamManager.AllowRefund(transactOpts, streamID)
 	if err != nil {
 		s.logger.Errorf("failed to allow refund: %s", err)
 	}
 
-	s.logger.Infof("approve stream creation on stream id %d", streamId.Uint64())
+	s.logger.Infof("approve stream creation on stream id %d", streamID.Uint64())
 	tx, err := s.streamManager.ApproveStreamCreation(
 		transactOpts,
-		streamId,
+		streamID,
 	)
-
-	go func(context.Context) {
-		span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStreamAsync")
-		defer span.Finish()
-
-		if err != nil {
-			s.logger.Errorf("failed to approve stream: %s", err)
-		}
-
-		s.logger.Infof("log stream approve event on stream id %d", streamId.Uint64())
-		resultCh, errCh := s.eventListener.LogStreamApproveEvent(ctx, streamId)
-		select {
-		case err := <-errCh:
-			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:      jobId,
-					PipelineId: pipelineId,
-					UserId:     userId,
-					Status:     pipelinesv1.PipelineStreamStatusFailed,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:      jobId,
-					PipelineId: pipelineId,
-					UserId:     userId,
-					StreamId:   e.StreamID.Uint64(),
-					Status:     pipelinesv1.PipelineStreamStatusCreatePending,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		}
-	}(ctx)
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
@@ -282,7 +184,6 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*v
 	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
 	defer span.Finish()
 
-	span.SetTag("pipeline_id", req.PipelineId)
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
@@ -292,63 +193,17 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*v
 		return nil, err
 	}
 
-	userId := req.UserId
-	jobId := req.JobId
-	pipelineId := req.PipelineId
-	streamId := new(big.Int).SetUint64(req.StreamId)
+	streamID := new(big.Int).SetUint64(req.StreamId)
 
 	// todo: constant value ???
 	i, e := big.NewInt(10), big.NewInt(19)
 	transactOpts.Value = i.Exp(i, e, nil)
 
-	s.logger.Infof("create stream on stream id %d", streamId.Uint64())
+	s.logger.Infof("create stream on stream id %d", streamID.Uint64())
 	tx, err := s.streamManager.CreateStream(
 		transactOpts,
-		streamId,
+		streamID,
 	)
-
-	go func(context.Context) {
-		span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStreamAsync")
-		defer span.Finish()
-
-		if err != nil {
-			s.logger.Errorf("failed to create stream: %s", err)
-		}
-
-		resultCh, errCh := s.eventListener.LogStreamCreateEvent(ctx, streamId)
-
-		select {
-		case err := <-errCh:
-			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:      jobId,
-					PipelineId: pipelineId,
-					UserId:     userId,
-					Status:     pipelinesv1.PipelineStreamStatusFailed,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:         jobId,
-					PipelineId:    pipelineId,
-					UserId:        userId,
-					StreamId:      e.StreamID.Uint64(),
-					StreamAddress: e.StreamAddress.Hex(),
-					Status:        pipelinesv1.PipelineStreamStatusRunPending,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		}
-	}(ctx)
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
@@ -357,7 +212,6 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*v1.T
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
-	span.SetTag("pipeline_id", req.PipelineId)
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", fmt.Sprintf("%d", req.StreamId))
 
@@ -367,58 +221,13 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*v1.T
 		return nil, err
 	}
 
-	userId := req.UserId
-	pipelineId := req.PipelineId
-	jobId := req.JobId
-	streamId := new(big.Int).SetUint64(req.StreamId)
+	streamID := new(big.Int).SetUint64(req.StreamId)
 
-	s.logger.Infof("end stream on stream id %d", streamId.Uint64())
+	s.logger.Infof("end stream on stream id %d", streamID.Uint64())
 	tx, err := s.streamManager.EndStream(
 		transactOpts,
-		streamId,
+		streamID,
 	)
-
-	go func(context.Context) {
-		span, ctx := opentracing.StartSpanFromContext(ctx, "EndStreamAsync")
-		defer span.Finish()
-
-		if err != nil {
-			s.logger.Errorf("failed to end stream: %s", err)
-		}
-
-		resultCh, errCh := s.eventListener.LogEndStreamEvent(ctx, streamId, transactOpts.From)
-
-		select {
-		case err := <-errCh:
-			s.logger.Error(err)
-			err = s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:      jobId,
-					PipelineId: pipelineId,
-					UserId:     userId,
-					Status:     pipelinesv1.PipelineStreamStatusFailed,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		case e := <-resultCh:
-			err := s.eb.UpdatePipelineStreamStatus(
-				span,
-				&pipelinesv1.UpdatePipelineStreamRequest{
-					JobId:      jobId,
-					PipelineId: pipelineId,
-					UserId:     userId,
-					StreamId:   e.StreamID.Uint64(),
-					Status:     pipelinesv1.PipelineStreamStatusCompleted,
-				})
-			if err != nil {
-				s.logger.Error(err)
-			}
-			return
-		}
-	}(ctx)
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
