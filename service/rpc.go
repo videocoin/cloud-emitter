@@ -116,7 +116,7 @@ func (s *RpcServer) Health(ctx context.Context, req *protoempty.Empty) (*rpc.Hea
 	return &rpc.HealthStatus{Status: "OK"}, nil
 }
 
-func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*v1.Tx, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
 	defer span.Finish()
 
@@ -147,16 +147,17 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		pNames = append(pNames, p.Name)
 	}
 
+	s.logger.Infof("request stream on stream id %d", streamId.Uint64())
+	tx, err := s.streamManager.RequestStream(
+		transactOpts,
+		streamId,
+		pNames,
+	)
+
 	go func(ctx context.Context) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStreamAsync")
 		defer span.Finish()
 
-		s.logger.Infof("request stream on stream id %d", streamId.Uint64())
-		_, err = s.streamManager.RequestStream(
-			transactOpts,
-			streamId,
-			pNames,
-		)
 		if err != nil {
 			s.logger.Errorf("failed to request stream: %s", err)
 		}
@@ -198,10 +199,10 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		}
 	}(ctx)
 
-	return &protoempty.Empty{}, nil
+	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
 
-func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*v1.Tx, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStream")
 	defer span.Finish()
 
@@ -220,21 +221,22 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 	jobId := req.JobId
 	streamId := new(big.Int).SetUint64(req.StreamId)
 
+	s.logger.Infof("allow refund on stream id %d", streamId.Uint64())
+	_, err = s.streamManager.AllowRefund(transactOpts, streamId)
+	if err != nil {
+		s.logger.Errorf("failed to allow refund: %s", err)
+	}
+
+	s.logger.Infof("approve stream creation on stream id %d", streamId.Uint64())
+	tx, err := s.streamManager.ApproveStreamCreation(
+		transactOpts,
+		streamId,
+	)
+
 	go func(context.Context) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStreamAsync")
 		defer span.Finish()
 
-		s.logger.Infof("allow refund on stream id %d", streamId.Uint64())
-		_, err := s.streamManager.AllowRefund(transactOpts, streamId)
-		if err != nil {
-			s.logger.Errorf("failed to allow refund: %s", err)
-		}
-
-		s.logger.Infof("approve stream creation on stream id %d", streamId.Uint64())
-		_, err = s.streamManager.ApproveStreamCreation(
-			transactOpts,
-			streamId,
-		)
 		if err != nil {
 			s.logger.Errorf("failed to approve stream: %s", err)
 		}
@@ -273,10 +275,10 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 		}
 	}(ctx)
 
-	return &protoempty.Empty{}, nil
+	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
 
-func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*v1.Tx, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
 	defer span.Finish()
 
@@ -299,15 +301,16 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 	i, e := big.NewInt(10), big.NewInt(19)
 	transactOpts.Value = i.Exp(i, e, nil)
 
+	s.logger.Infof("create stream on stream id %d", streamId.Uint64())
+	tx, err := s.streamManager.CreateStream(
+		transactOpts,
+		streamId,
+	)
+
 	go func(context.Context) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStreamAsync")
 		defer span.Finish()
 
-		s.logger.Infof("create stream on stream id %d", streamId.Uint64())
-		_, err = s.streamManager.CreateStream(
-			transactOpts,
-			streamId,
-		)
 		if err != nil {
 			s.logger.Errorf("failed to create stream: %s", err)
 		}
@@ -347,10 +350,10 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*p
 		}
 	}(ctx)
 
-	return &protoempty.Empty{}, nil
+	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
 
-func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*v1.Tx, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
@@ -369,15 +372,16 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 	jobId := req.JobId
 	streamId := new(big.Int).SetUint64(req.StreamId)
 
+	s.logger.Infof("end stream on stream id %d", streamId.Uint64())
+	tx, err := s.streamManager.EndStream(
+		transactOpts,
+		streamId,
+	)
+
 	go func(context.Context) {
 		span, ctx := opentracing.StartSpanFromContext(ctx, "EndStreamAsync")
 		defer span.Finish()
 
-		s.logger.Infof("end stream on stream id %d", streamId.Uint64())
-		_, err = s.streamManager.EndStream(
-			transactOpts,
-			streamId,
-		)
 		if err != nil {
 			s.logger.Errorf("failed to end stream: %s", err)
 		}
@@ -416,7 +420,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*prot
 		}
 	}(ctx)
 
-	return &protoempty.Empty{}, nil
+	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
 
 func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*bind.TransactOpts, error) {

@@ -62,7 +62,6 @@ func (e *EventListener) LogStreamRequestEvent(ctx context.Context, streamID *big
 				)
 
 				errCh <- err
-				break
 			default:
 				iterator, err := e.streamManager.FilterStreamRequested(
 					new(bind.FilterOpts), addresses, streamIDs)
@@ -150,7 +149,6 @@ func (e *EventListener) LogStreamCreateEvent(ctx context.Context, streamID *big.
 				)
 
 				errCh <- err
-				break
 			default:
 				iterator, err := e.streamManager.FilterStreamCreated(
 					new(bind.FilterOpts), streamAddresses, streamIDs)
@@ -234,7 +232,6 @@ func (e *EventListener) LogStreamApproveEvent(ctx context.Context, streamID *big
 				err := fmt.Errorf("failed to log stream approved event and exit on timeout")
 				e.logger.Error(err)
 				errCh <- err
-				break
 			default:
 				iterator, err := e.streamManager.FilterStreamApproved(
 					new(bind.FilterOpts), streamIDs)
@@ -323,7 +320,6 @@ func (e *EventListener) LogInputChunkAddEvent(ctx context.Context, streamID *big
 				)
 
 				errCh <- err
-				break
 			default:
 				iterator, err := e.streamManager.FilterInputChunkAdded(
 					new(bind.FilterOpts), streamIDs, chunkIDs)
@@ -414,7 +410,6 @@ func (e *EventListener) LogEndStreamEvent(ctx context.Context, streamID *big.Int
 				)
 
 				errCh <- err
-				break
 			default:
 				iterator, err := e.streamManager.FilterStreamEnded(
 					new(bind.FilterOpts), streamIDs, caller)
