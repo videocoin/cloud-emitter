@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+// Used for function signature
 var (
 	EventStreamRequested       = "EventStreamRequested"
 	EventStreamCreated         = "EventStreamCreated"

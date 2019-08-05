@@ -18,12 +18,14 @@ enum JobStatus {
 
     JOB_STATUS_NONE = 0 [ (gogoproto.enumvalue_customname) = "JobStatusNone" ];
     JOB_STATUS_NEW = 1 [ (gogoproto.enumvalue_customname) = "JobStatusNew" ];
-    JOB_STATUS_PENDING = 2 [ (gogoproto.enumvalue_customname) = "JobStatusPending" ];
-    JOB_STATUS_PROCESSING = 3 [ (gogoproto.enumvalue_customname) = "JobStatusProcessing" ];
-    JOB_STATUS_READY = 4 [ (gogoproto.enumvalue_customname) = "JobStatusReady" ];
-    JOB_STATUS_COMPLETED = 5 [ (gogoproto.enumvalue_customname) = "JobStatusCompleted" ];
-    JOB_STATUS_CANCELLED = 6 [ (gogoproto.enumvalue_customname) = "JobStatusCancelled" ];
-    JOB_STATUS_FAILED = 7 [ (gogoproto.enumvalue_customname) = "JobStatusFailed" ];
+    JOB_STATUS_PREPARING = 2 [ (gogoproto.enumvalue_customname) = "JobStatusPreparing" ];
+    JOB_STATUS_PREPARED = 3 [ (gogoproto.enumvalue_customname) = "JobStatusPrepared" ];
+    JOB_STATUS_PENDING = 4 [ (gogoproto.enumvalue_customname) = "JobStatusPending" ];
+    JOB_STATUS_PROCESSING = 5 [ (gogoproto.enumvalue_customname) = "JobStatusProcessing" ];
+    JOB_STATUS_READY = 6 [ (gogoproto.enumvalue_customname) = "JobStatusReady" ];
+    JOB_STATUS_COMPLETED = 7 [ (gogoproto.enumvalue_customname) = "JobStatusCompleted" ];
+    JOB_STATUS_CANCELLED = 8 [ (gogoproto.enumvalue_customname) = "JobStatusCancelled" ];
+    JOB_STATUS_FAILED = 9 [ (gogoproto.enumvalue_customname) = "JobStatusFailed" ];
 }
 
 enum InputStatus {
@@ -50,7 +52,6 @@ message Job {
     ];
 
     string pipeline_id = 4;
-    string transcoder_id = 5;
     cloud.api.profiles.v1.ProfileId profile_id = 6;
     string client_address = 7;
     string stream_address = 8;

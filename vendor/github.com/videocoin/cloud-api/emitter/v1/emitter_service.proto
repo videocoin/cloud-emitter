@@ -34,9 +34,7 @@ message Tx {
 }
 
 message StreamRequest {
-    string pipeline_id = 1;
-    string job_id = 2;
-    string user_id = 3;
-    uint64 stream_id = 4;
-    string client_address = 5;
+    string user_id = 1;
+    uint64 stream_id = 2;
+    string client_address = 3;
 }
