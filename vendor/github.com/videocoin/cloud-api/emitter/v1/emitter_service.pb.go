@@ -32,6 +32,57 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 
+type Tx struct {
+	Hash                 []byte   `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Tx) Reset()         { *m = Tx{} }
+func (m *Tx) String() string { return proto.CompactTextString(m) }
+func (*Tx) ProtoMessage()    {}
+func (*Tx) Descriptor() ([]byte, []int) {
+	return fileDescriptor_595d714f170d55af, []int{0}
+}
+func (m *Tx) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Tx) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Tx.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Tx) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Tx.Merge(m, src)
+}
+func (m *Tx) XXX_Size() int {
+	return m.Size()
+}
+func (m *Tx) XXX_DiscardUnknown() {
+	xxx_messageInfo_Tx.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Tx proto.InternalMessageInfo
+
+func (m *Tx) GetHash() []byte {
+	if m != nil {
+		return m.Hash
+	}
+	return nil
+}
+
+func (*Tx) XXX_MessageName() string {
+	return "cloud.api.streams.v1.Tx"
+}
+
 type StreamRequest struct {
 	PipelineId           string   `protobuf:"bytes,1,opt,name=pipeline_id,json=pipelineId,proto3" json:"pipeline_id,omitempty"`
 	JobId                string   `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
@@ -47,7 +98,7 @@ func (m *StreamRequest) Reset()         { *m = StreamRequest{} }
 func (m *StreamRequest) String() string { return proto.CompactTextString(m) }
 func (*StreamRequest) ProtoMessage()    {}
 func (*StreamRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{0}
+	return fileDescriptor_595d714f170d55af, []int{1}
 }
 func (m *StreamRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -115,6 +166,8 @@ func (*StreamRequest) XXX_MessageName() string {
 	return "cloud.api.streams.v1.StreamRequest"
 }
 func init() {
+	proto.RegisterType((*Tx)(nil), "cloud.api.streams.v1.Tx")
+	golang_proto.RegisterType((*Tx)(nil), "cloud.api.streams.v1.Tx")
 	proto.RegisterType((*StreamRequest)(nil), "cloud.api.streams.v1.StreamRequest")
 	golang_proto.RegisterType((*StreamRequest)(nil), "cloud.api.streams.v1.StreamRequest")
 }
@@ -125,34 +178,35 @@ func init() {
 }
 
 var fileDescriptor_595d714f170d55af = []byte{
-	// 427 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x91, 0x4f, 0x8b, 0x13, 0x31,
-	0x18, 0xc6, 0x4d, 0x77, 0xb7, 0x6e, 0xa3, 0x5d, 0x24, 0xf8, 0xa7, 0xb4, 0x32, 0x96, 0x8a, 0xb0,
-	0x97, 0x4d, 0xa8, 0x7e, 0x82, 0x55, 0x0a, 0x8e, 0xa0, 0x42, 0x7b, 0xf3, 0x52, 0x32, 0x93, 0xd7,
-	0x69, 0x96, 0x99, 0x49, 0x4c, 0x32, 0x03, 0x7a, 0xf4, 0x2b, 0x78, 0xf5, 0xe8, 0x07, 0xf1, 0xb8,
-	0x47, 0xc1, 0x2f, 0x20, 0x5d, 0x3f, 0x88, 0x24, 0x99, 0x65, 0x15, 0xdc, 0x5b, 0x6f, 0xf3, 0x3e,
-	0xcf, 0xf3, 0x3e, 0xc9, 0xfc, 0x82, 0xa7, 0x50, 0x49, 0xe7, 0xc0, 0xb0, 0x76, 0xce, 0xba, 0xcf,
-	0xb5, 0x05, 0xd3, 0xca, 0x1c, 0xa8, 0x36, 0xca, 0x29, 0x72, 0x37, 0x2f, 0x55, 0x23, 0x28, 0xd7,
-	0x92, 0x5a, 0x67, 0x80, 0x57, 0x96, 0xb6, 0xf3, 0xf1, 0xa4, 0x50, 0xaa, 0x28, 0x81, 0x85, 0x4c,
-	0xd6, 0xbc, 0x67, 0x50, 0x69, 0xf7, 0x31, 0xae, 0x8c, 0x1f, 0x76, 0x26, 0xd7, 0x92, 0xf1, 0xba,
-	0x56, 0x8e, 0x3b, 0xa9, 0x6a, 0xdb, 0xb9, 0x27, 0x85, 0x74, 0x9b, 0x26, 0xa3, 0xb9, 0xaa, 0x58,
-	0xa1, 0x0a, 0x75, 0xd5, 0xe1, 0xa7, 0x30, 0x84, 0xaf, 0x2e, 0xce, 0xfe, 0x8a, 0xb7, 0x52, 0x80,
-	0xca, 0x95, 0xac, 0x59, 0xb8, 0xd4, 0x89, 0x3f, 0xc0, 0xe8, 0x9c, 0x6d, 0x80, 0x97, 0x6e, 0x13,
-	0x17, 0x66, 0xdf, 0x10, 0x1e, 0xae, 0xc2, 0x4d, 0x97, 0xf0, 0xa1, 0x01, 0xeb, 0xc8, 0x23, 0x7c,
-	0x4b, 0x4b, 0x0d, 0xa5, 0xac, 0x61, 0x2d, 0xc5, 0x08, 0x4d, 0xd1, 0xf1, 0x60, 0x89, 0x2f, 0xa5,
-	0x54, 0x90, 0x7b, 0xb8, 0x7f, 0xa6, 0x32, 0xef, 0xf5, 0x82, 0x77, 0x70, 0xa6, 0xb2, 0x54, 0x90,
-	0x07, 0xf8, 0x66, 0x63, 0xc1, 0x78, 0x7d, 0x2f, 0xe8, 0x7d, 0x3f, 0xa6, 0x82, 0x4c, 0xf0, 0x20,
-	0xb2, 0xf0, 0xd6, 0xfe, 0x14, 0x1d, 0xef, 0x2f, 0x0f, 0xa3, 0x90, 0x0a, 0xf2, 0x04, 0x1f, 0xe5,
-	0xa5, 0x84, 0xda, 0xad, 0xb9, 0x10, 0x06, 0xac, 0x1d, 0x1d, 0x84, 0xe5, 0x61, 0x54, 0x4f, 0xa3,
-	0xf8, 0xf4, 0xeb, 0x1e, 0x3e, 0x5a, 0x44, 0xe2, 0xab, 0x08, 0x9c, 0xbc, 0xc5, 0xfd, 0x97, 0xe1,
-	0x4f, 0xc8, 0x7d, 0x1a, 0x11, 0xd2, 0x4b, 0x36, 0x74, 0xe1, 0xf9, 0x8e, 0x27, 0xf4, 0xea, 0x35,
-	0x8c, 0xce, 0x69, 0x8c, 0xaf, 0x1c, 0x77, 0x8d, 0x9d, 0xdd, 0xf9, 0xfc, 0xf3, 0xf7, 0x97, 0x1e,
-	0x26, 0x87, 0x1d, 0x8f, 0x4f, 0xe4, 0x0d, 0x1e, 0x76, 0x0c, 0x22, 0x10, 0xf2, 0x98, 0xfe, 0xef,
-	0x35, 0xe9, 0x3f, 0xb8, 0xc6, 0xd7, 0x1c, 0x3e, 0xbb, 0xe1, 0xfb, 0x4e, 0xb5, 0x36, 0xaa, 0x85,
-	0xdd, 0xf4, 0xbd, 0xc6, 0xb7, 0x5f, 0x18, 0xe0, 0x6e, 0x47, 0x75, 0xaf, 0xf0, 0x60, 0x51, 0x8b,
-	0x9d, 0x74, 0x3d, 0x1f, 0x9d, 0x6f, 0x13, 0xf4, 0x63, 0x9b, 0xa0, 0x5f, 0xdb, 0x04, 0x7d, 0xbf,
-	0x48, 0xd0, 0xf9, 0x45, 0x82, 0xde, 0xf5, 0xda, 0x79, 0xd6, 0x0f, 0xd9, 0x67, 0x7f, 0x02, 0x00,
-	0x00, 0xff, 0xff, 0x43, 0x64, 0xad, 0x8a, 0x3b, 0x03, 0x00, 0x00,
+	// 445 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x51, 0xdd, 0x6e, 0xd3, 0x30,
+	0x18, 0xc5, 0x5d, 0x57, 0x56, 0xb3, 0x4e, 0xc8, 0xe2, 0x27, 0x6a, 0x51, 0xa8, 0x8a, 0x90, 0x76,
+	0x33, 0x5b, 0x85, 0x27, 0x18, 0xa8, 0x12, 0x95, 0x90, 0x86, 0xda, 0x5d, 0x71, 0x53, 0x39, 0xf1,
+	0x47, 0xe2, 0x29, 0x8d, 0x8d, 0xed, 0x44, 0x83, 0x4b, 0x5e, 0x81, 0x57, 0xd8, 0x83, 0x70, 0xb9,
+	0x4b, 0x24, 0x5e, 0x00, 0x75, 0x3c, 0x08, 0x8a, 0x9d, 0x69, 0x20, 0xf5, 0xb2, 0x77, 0xdf, 0x77,
+	0xce, 0xf9, 0x4e, 0xe2, 0x73, 0xf0, 0x18, 0xd6, 0xd2, 0x39, 0x30, 0xac, 0x9e, 0xb2, 0x76, 0x5c,
+	0x59, 0x30, 0xb5, 0x4c, 0x81, 0x6a, 0xa3, 0x9c, 0x22, 0x8f, 0xd2, 0x42, 0x55, 0x82, 0x72, 0x2d,
+	0xa9, 0x75, 0x06, 0xf8, 0xda, 0xd2, 0x7a, 0x3a, 0x1c, 0x65, 0x4a, 0x65, 0x05, 0x30, 0xaf, 0x49,
+	0xaa, 0x4f, 0x0c, 0xd6, 0xda, 0x7d, 0x09, 0x27, 0xc3, 0x67, 0x2d, 0xc9, 0xb5, 0x64, 0xbc, 0x2c,
+	0x95, 0xe3, 0x4e, 0xaa, 0xd2, 0xb6, 0xec, 0x49, 0x26, 0x5d, 0x5e, 0x25, 0x34, 0x55, 0x6b, 0x96,
+	0xa9, 0x4c, 0xdd, 0x79, 0x34, 0x9b, 0x5f, 0xfc, 0xd4, 0xca, 0xd9, 0x3f, 0xf2, 0x5a, 0x0a, 0x50,
+	0xa9, 0x92, 0x25, 0xf3, 0x3f, 0x75, 0xd2, 0x7c, 0xc0, 0xe8, 0x94, 0xe5, 0xc0, 0x0b, 0x97, 0x87,
+	0x83, 0x49, 0x84, 0x3b, 0xe7, 0x97, 0x84, 0xe0, 0x6e, 0xce, 0x6d, 0x1e, 0xa1, 0x31, 0x3a, 0x3e,
+	0x5c, 0xf8, 0x79, 0x72, 0x85, 0xf0, 0x60, 0xe9, 0xdf, 0xb0, 0x80, 0xcf, 0x15, 0x58, 0x47, 0x9e,
+	0xe3, 0x07, 0x5a, 0x6a, 0x28, 0x64, 0x09, 0x2b, 0x29, 0xbc, 0xb8, 0xbf, 0xc0, 0xb7, 0xd0, 0x5c,
+	0x90, 0xc7, 0xb8, 0x77, 0xa1, 0x92, 0x86, 0xeb, 0x78, 0x6e, 0xff, 0x42, 0x25, 0x73, 0x41, 0x9e,
+	0xe2, 0xfb, 0x95, 0x05, 0xd3, 0xe0, 0x7b, 0x1e, 0xef, 0x35, 0xeb, 0x5c, 0x90, 0x11, 0xee, 0x87,
+	0x94, 0x1a, 0xaa, 0x3b, 0x46, 0xc7, 0xdd, 0xc5, 0x41, 0x00, 0xe6, 0x82, 0xbc, 0xc4, 0x47, 0x69,
+	0x21, 0xa1, 0x74, 0x2b, 0x2e, 0x84, 0x01, 0x6b, 0xa3, 0x7d, 0x7f, 0x3c, 0x08, 0xe8, 0x69, 0x00,
+	0x5f, 0x5d, 0xed, 0xe1, 0xa3, 0x59, 0xe8, 0x62, 0x19, 0xaa, 0x20, 0x67, 0xb8, 0xf7, 0xce, 0xbf,
+	0x91, 0x3c, 0xa1, 0x21, 0x5c, 0x7a, 0x9b, 0x1a, 0x9d, 0x35, 0xc9, 0x0f, 0x47, 0xf4, 0xae, 0x27,
+	0xa3, 0x53, 0x1a, 0xe4, 0x4b, 0xc7, 0x5d, 0x65, 0x27, 0x0f, 0xbf, 0xfd, 0xfa, 0xf3, 0xbd, 0x83,
+	0xc9, 0x41, 0x9b, 0xd4, 0x57, 0xf2, 0x01, 0x0f, 0xda, 0x0c, 0x42, 0x20, 0xe4, 0x05, 0xdd, 0xd6,
+	0x33, 0xfd, 0x2f, 0xae, 0x61, 0xb4, 0x5d, 0x74, 0x7e, 0x39, 0xb9, 0xd7, 0x38, 0x9e, 0x6a, 0x6d,
+	0x54, 0x0d, 0xbb, 0x72, 0x3c, 0xc3, 0x87, 0x6f, 0x0d, 0x70, 0xb7, 0x33, 0xc3, 0xf7, 0xb8, 0x3f,
+	0x2b, 0xc5, 0x8e, 0xdc, 0xde, 0x44, 0xd7, 0x9b, 0x18, 0xfd, 0xdc, 0xc4, 0xe8, 0xf7, 0x26, 0x46,
+	0x3f, 0x6e, 0x62, 0x74, 0x7d, 0x13, 0xa3, 0x8f, 0x9d, 0x7a, 0x9a, 0xf4, 0x7c, 0x37, 0xaf, 0xff,
+	0x06, 0x00, 0x00, 0xff, 0xff, 0x6a, 0x18, 0x58, 0x35, 0x5d, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -168,10 +222,10 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type EmitterServiceClient interface {
 	Health(ctx context.Context, in *types.Empty, opts ...grpc.CallOption) (*rpc.HealthStatus, error)
-	RequestStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error)
-	ApproveStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error)
-	CreateStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error)
-	EndStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error)
+	RequestStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error)
+	ApproveStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error)
+	CreateStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error)
+	EndStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error)
 }
 
 type emitterServiceClient struct {
@@ -191,8 +245,8 @@ func (c *emitterServiceClient) Health(ctx context.Context, in *types.Empty, opts
 	return out, nil
 }
 
-func (c *emitterServiceClient) RequestStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error) {
-	out := new(types.Empty)
+func (c *emitterServiceClient) RequestStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error) {
+	out := new(Tx)
 	err := c.cc.Invoke(ctx, "/cloud.api.streams.v1.EmitterService/RequestStream", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -200,8 +254,8 @@ func (c *emitterServiceClient) RequestStream(ctx context.Context, in *StreamRequ
 	return out, nil
 }
 
-func (c *emitterServiceClient) ApproveStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error) {
-	out := new(types.Empty)
+func (c *emitterServiceClient) ApproveStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error) {
+	out := new(Tx)
 	err := c.cc.Invoke(ctx, "/cloud.api.streams.v1.EmitterService/ApproveStream", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -209,8 +263,8 @@ func (c *emitterServiceClient) ApproveStream(ctx context.Context, in *StreamRequ
 	return out, nil
 }
 
-func (c *emitterServiceClient) CreateStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error) {
-	out := new(types.Empty)
+func (c *emitterServiceClient) CreateStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error) {
+	out := new(Tx)
 	err := c.cc.Invoke(ctx, "/cloud.api.streams.v1.EmitterService/CreateStream", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -218,8 +272,8 @@ func (c *emitterServiceClient) CreateStream(ctx context.Context, in *StreamReque
 	return out, nil
 }
 
-func (c *emitterServiceClient) EndStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*types.Empty, error) {
-	out := new(types.Empty)
+func (c *emitterServiceClient) EndStream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (*Tx, error) {
+	out := new(Tx)
 	err := c.cc.Invoke(ctx, "/cloud.api.streams.v1.EmitterService/EndStream", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -230,10 +284,10 @@ func (c *emitterServiceClient) EndStream(ctx context.Context, in *StreamRequest,
 // EmitterServiceServer is the server API for EmitterService service.
 type EmitterServiceServer interface {
 	Health(context.Context, *types.Empty) (*rpc.HealthStatus, error)
-	RequestStream(context.Context, *StreamRequest) (*types.Empty, error)
-	ApproveStream(context.Context, *StreamRequest) (*types.Empty, error)
-	CreateStream(context.Context, *StreamRequest) (*types.Empty, error)
-	EndStream(context.Context, *StreamRequest) (*types.Empty, error)
+	RequestStream(context.Context, *StreamRequest) (*Tx, error)
+	ApproveStream(context.Context, *StreamRequest) (*Tx, error)
+	CreateStream(context.Context, *StreamRequest) (*Tx, error)
+	EndStream(context.Context, *StreamRequest) (*Tx, error)
 }
 
 // UnimplementedEmitterServiceServer can be embedded to have forward compatible implementations.
@@ -243,16 +297,16 @@ type UnimplementedEmitterServiceServer struct {
 func (*UnimplementedEmitterServiceServer) Health(ctx context.Context, req *types.Empty) (*rpc.HealthStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
 }
-func (*UnimplementedEmitterServiceServer) RequestStream(ctx context.Context, req *StreamRequest) (*types.Empty, error) {
+func (*UnimplementedEmitterServiceServer) RequestStream(ctx context.Context, req *StreamRequest) (*Tx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestStream not implemented")
 }
-func (*UnimplementedEmitterServiceServer) ApproveStream(ctx context.Context, req *StreamRequest) (*types.Empty, error) {
+func (*UnimplementedEmitterServiceServer) ApproveStream(ctx context.Context, req *StreamRequest) (*Tx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ApproveStream not implemented")
 }
-func (*UnimplementedEmitterServiceServer) CreateStream(ctx context.Context, req *StreamRequest) (*types.Empty, error) {
+func (*UnimplementedEmitterServiceServer) CreateStream(ctx context.Context, req *StreamRequest) (*Tx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateStream not implemented")
 }
-func (*UnimplementedEmitterServiceServer) EndStream(ctx context.Context, req *StreamRequest) (*types.Empty, error) {
+func (*UnimplementedEmitterServiceServer) EndStream(ctx context.Context, req *StreamRequest) (*Tx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EndStream not implemented")
 }
 
@@ -379,6 +433,33 @@ var _EmitterService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "emitter/v1/emitter_service.proto",
 }
 
+func (m *Tx) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Tx) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Hash) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.Hash)))
+		i += copy(dAtA[i:], m.Hash)
+	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return i, nil
+}
+
 func (m *StreamRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -438,6 +519,22 @@ func encodeVarintEmitterService(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return offset + 1
 }
+func (m *Tx) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Hash)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
 func (m *StreamRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -474,6 +571,94 @@ func sovEmitterService(x uint64) (n int) {
 }
 func sozEmitterService(x uint64) (n int) {
 	return sovEmitterService(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *Tx) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEmitterService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Tx: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Tx: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Hash", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Hash = append(m.Hash[:0], dAtA[iNdEx:postIndex]...)
+			if m.Hash == nil {
+				m.Hash = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEmitterService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *StreamRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)

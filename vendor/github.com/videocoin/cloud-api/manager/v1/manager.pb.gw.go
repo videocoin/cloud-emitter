@@ -9,6 +9,7 @@ It translates gRPC into RESTful JSON APIs.
 package v1
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	v1_0 "github.com/videocoin/cloud-api/jobs/v1"
 	"github.com/videocoin/cloud-api/profiles/v1"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"

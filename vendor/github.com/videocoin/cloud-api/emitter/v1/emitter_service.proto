@@ -21,12 +21,16 @@ service EmitterService {
         };
     }
 
-    rpc RequestStream(StreamRequest) returns (google.protobuf.Empty) {}
-    rpc ApproveStream(StreamRequest) returns (google.protobuf.Empty) {}
-    rpc CreateStream(StreamRequest) returns (google.protobuf.Empty) {}
-    rpc EndStream(StreamRequest) returns (google.protobuf.Empty) {}
+    rpc RequestStream(StreamRequest) returns (Tx) {}
+    rpc ApproveStream(StreamRequest) returns (Tx) {}
+    rpc CreateStream(StreamRequest) returns (Tx) {}
+    rpc EndStream(StreamRequest) returns (Tx) {}
 
     // rpc AddInputChunk(AddInputChunkRequest) returns (google.protobuf.Empty) {}
+}
+
+message Tx {
+    bytes hash = 1;
 }
 
 message StreamRequest {

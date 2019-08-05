@@ -17,7 +17,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/uber-go/atomic v1.4.0 // indirect
-	github.com/videocoin/cloud-api v0.1.161-0.20190726203359-4500798149ed
+	github.com/videocoin/cloud-api v0.1.158
 	github.com/videocoin/cloud-pkg v0.0.3-0.20190712213107-e13988c093de
 	go.uber.org/atomic v1.4.0 // indirect
 	google.golang.org/grpc v1.21.1
