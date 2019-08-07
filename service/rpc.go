@@ -10,13 +10,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/gogo/protobuf/types"
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
-	managerv1 "github.com/videocoin/cloud-api/manager/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	"github.com/videocoin/cloud-pkg/bcops"
 	"github.com/videocoin/cloud-pkg/grpcutil"
@@ -31,12 +29,10 @@ type RpcServerOptions struct {
 	ContractAddr string
 	Logger       *logrus.Entry
 	Accounts     accountsv1.AccountServiceClient
-	Manager      managerv1.ManagerServiceClient
 	EB           *EventBus
-
-	Secret  string
-	MKey    string
-	MSecret string
+	Secret       string
+	MKey         string
+	MSecret      string
 }
 
 type RpcServer struct {
@@ -47,7 +43,6 @@ type RpcServer struct {
 	logger        *logrus.Entry
 	eb            *EventBus
 	accounts      accountsv1.AccountServiceClient
-	manager       managerv1.ManagerServiceClient
 	ethClient     *ethclient.Client
 	streamManager *sm.Manager
 	eventListener *EventListener
@@ -91,7 +86,6 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 		logger:        opts.Logger,
 		eb:            opts.EB,
 		accounts:      opts.Accounts,
-		manager:       opts.Manager,
 		ethClient:     ethClient,
 		streamManager: manager,
 		eventListener: eventListener,
@@ -130,21 +124,11 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 
 	streamID := big.NewInt(int64(req.StreamId))
 
-	profiles, err := s.manager.GetProfiles(context.Background(), new(types.Empty))
-	if err != nil {
-		return nil, err
-	}
-
-	pNames := make([]string, 0)
-	for _, p := range profiles.Profiles {
-		pNames = append(pNames, p.Name)
-	}
-
 	s.logger.Infof("request stream on stream id %d", streamID.Uint64())
 	tx, err := s.streamManager.RequestStream(
 		transactOpts,
 		streamID,
-		pNames,
+		req.ProfileNames,
 	)
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil

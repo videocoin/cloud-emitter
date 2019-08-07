@@ -1,12 +1,7 @@
 package service
 
 import (
-	"context"
-
-	"github.com/gogo/protobuf/types"
-	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
-	managerv1 "github.com/videocoin/cloud-api/manager/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-pkg/mqmux"
 	"google.golang.org/grpc"
@@ -28,19 +23,6 @@ func NewService(cfg *Config) (*Service, error) {
 
 	accounts := accountsv1.NewAccountServiceClient(accountsConn)
 
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-	managerConn, err := grpc.Dial(cfg.ManagerRPCAddr, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	manager := managerv1.NewManagerServiceClient(managerConn)
-	status, err := manager.Health(context.Background(), &types.Empty{})
-	if status.GetStatus() != "healthy" || err != nil {
-		logrus.Errorf("failed to get healthy status from manager: %s", err.Error())
-		panic(err)
-	}
-
 	mq, err := mqmux.NewWorkerMux(cfg.MQURI, cfg.Name)
 	if err != nil {
 		return nil, err
@@ -60,7 +42,6 @@ func NewService(cfg *Config) (*Service, error) {
 		Logger:       cfg.Logger,
 		EB:           eb,
 		Accounts:     accounts,
-		Manager:      manager,
 		Secret:       cfg.Secret,
 		MKey:         cfg.MKey,
 		MSecret:      cfg.MSecret,
