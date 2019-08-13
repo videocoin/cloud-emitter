@@ -131,6 +131,11 @@ func (s *RpcServer) RequestStream(ctx context.Context, req *v1.StreamRequest) (*
 		req.ProfileNames,
 	)
 
+	if err != nil {
+		s.logger.Errorf("failed to request stream: %s", err.Error())
+		return nil, err
+	}
+
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
 
