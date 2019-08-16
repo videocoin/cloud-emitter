@@ -243,6 +243,7 @@ func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*
 
 	from := common.HexToAddress(key.Address)
 	transactOpts.From = from
+	transactOpts.GasPrice = big.NewInt(10000000000)
 
 	return transactOpts, nil
 }
