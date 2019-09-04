@@ -116,8 +116,6 @@ github.com/rjeczalik/notify
 github.com/rs/cors
 # github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
-# github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
-github.com/streadway/amqp
 # github.com/syndtr/goleveldb v1.0.0
 github.com/syndtr/goleveldb/leveldb
 github.com/syndtr/goleveldb/leveldb/errors
@@ -160,7 +158,6 @@ github.com/videocoin/cloud-pkg/logger
 github.com/videocoin/cloud-pkg/tracer
 github.com/videocoin/cloud-pkg/bcops
 github.com/videocoin/cloud-pkg/grpcutil
-github.com/videocoin/cloud-pkg/mqmux
 github.com/videocoin/cloud-pkg/streamManager
 # golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
 golang.org/x/crypto/pbkdf2

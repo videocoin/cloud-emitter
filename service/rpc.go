@@ -24,32 +24,28 @@ import (
 )
 
 type RpcServerOptions struct {
-	Addr         string
-	NodeHTTPAddr string
-	ContractAddr string
-	Logger       *logrus.Entry
-	Accounts     accountsv1.AccountServiceClient
-	EB           *EventBus
-	Secret       string
-	MKey         string
-	MSecret      string
+	Addr            string
+	RPCNodeHTTPAddr string
+	ContractAddr    string
+	Logger          *logrus.Entry
+	Accounts        accountsv1.AccountServiceClient
+	ClientSecret    string
+	ManagerKey      string
+	ManagerSecret   string
 }
 
 type RpcServer struct {
-	addr string
-
+	addr          string
 	grpc          *grpc.Server
 	listen        net.Listener
 	logger        *logrus.Entry
-	eb            *EventBus
 	accounts      accountsv1.AccountServiceClient
 	ethClient     *ethclient.Client
 	streamManager *sm.Manager
-	eventListener *EventListener
 
-	secret  string
-	mKey    string
-	mSecret string
+	clientSecret  string
+	managerKey    string
+	managerSecret string
 }
 
 func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
@@ -61,7 +57,7 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 		return nil, err
 	}
 
-	ethClient, err := ethclient.Dial(opts.NodeHTTPAddr)
+	ethClient, err := ethclient.Dial(opts.RPCNodeHTTPAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
 	}
@@ -72,26 +68,17 @@ func NewRpcServer(opts *RpcServerOptions) (*RpcServer, error) {
 		return nil, fmt.Errorf("failed to create smart contract stream manager: %s", err.Error())
 	}
 
-	eventListenerConfig := &EventListenerConfig{
-		StreamManager: manager,
-		Timeout:       120,
-		Logger:        opts.Logger,
-	}
-	eventListener := NewEventListener(eventListenerConfig)
-
 	rpcServer := &RpcServer{
 		addr:          opts.Addr,
 		grpc:          grpcServer,
 		listen:        listen,
 		logger:        opts.Logger,
-		eb:            opts.EB,
 		accounts:      opts.Accounts,
 		ethClient:     ethClient,
 		streamManager: manager,
-		eventListener: eventListener,
-		secret:        opts.Secret,
-		mKey:          opts.MKey,
-		mSecret:       opts.MSecret,
+		clientSecret:  opts.ClientSecret,
+		managerKey:    opts.ManagerKey,
+		managerSecret: opts.ManagerSecret,
 	}
 
 	v1.RegisterEmitterServiceServer(grpcServer, rpcServer)
@@ -165,6 +152,10 @@ func (s *RpcServer) ApproveStream(ctx context.Context, req *v1.StreamRequest) (*
 		transactOpts,
 		streamID,
 	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
@@ -193,6 +184,10 @@ func (s *RpcServer) CreateStream(ctx context.Context, req *v1.StreamRequest) (*v
 		transactOpts,
 		streamID,
 	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
@@ -217,6 +212,10 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.StreamRequest) (*v1.T
 		transactOpts,
 		streamID,
 	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
 
 	return &v1.Tx{Hash: tx.Hash().Bytes()}, nil
 }
@@ -231,7 +230,7 @@ func (s *RpcServer) getClientTransactOpts(ctx context.Context, userID string) (*
 		return nil, err
 	}
 
-	decrypted, err := keystore.DecryptKey([]byte(key.Key), s.secret)
+	decrypted, err := keystore.DecryptKey([]byte(key.Key), s.clientSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +251,7 @@ func (s *RpcServer) getManagerTransactOpts(ctx context.Context) (*bind.TransactO
 	span, _ := opentracing.StartSpanFromContext(ctx, "getManagerTransactOpts")
 	defer span.Finish()
 
-	decrypted, err := keystore.DecryptKey([]byte(s.mKey), s.mSecret)
+	decrypted, err := keystore.DecryptKey([]byte(s.managerKey), s.managerSecret)
 	if err != nil {
 		return nil, err
 	}

@@ -30,43 +30,38 @@ spec:
                   fieldPath: status.hostIP
             - name: JAEGER_AGENT_PORT
               value: "6831"
-            - name: EMITTER_RPCADDR
+            - name: RPC_ADDR
               value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
-            - name: EMITTER_ACCOUNTSRPCADDR
+            - name: ACCOUNTS_RPC_ADDR
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: accountsRpcAddr
-            - name: NODEHTTPADDR
+            - name: RPC_NODE_HTTP_ADDR
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: nodeHttpAddr
-            - name: CONTRACTADDR
+                  key: rpcNodeHttpAddr
+            - name: STREAM_MANAGER_CONTRACT_ADDR
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: contractAddr
-            - name: MQURI
+                  key: streamManagerContractAddr
+            - name: MANAGER_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: mqUri
-            - name: EMITTER_MKEY
+                  key: managerKey
+            - name: MANAGER_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: mKey
-            - name: EMITTER_MSECRET
+                  key: managerSecret
+            - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: mSecret
-            - name: EMITTER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: secret
+                  key: clientSecret
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:

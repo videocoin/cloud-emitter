@@ -3,14 +3,12 @@ package service
 import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
-	"github.com/videocoin/cloud-pkg/mqmux"
 	"google.golang.org/grpc"
 )
 
 type Service struct {
 	cfg *Config
 	rpc *RpcServer
-	eb  *EventBus
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -23,28 +21,15 @@ func NewService(cfg *Config) (*Service, error) {
 
 	accounts := accountsv1.NewAccountServiceClient(accountsConn)
 
-	mq, err := mqmux.NewWorkerMux(cfg.MQURI, cfg.Name)
-	if err != nil {
-		return nil, err
-	}
-	mq.Logger = cfg.Logger.WithField("system", "mq")
-
-	eblogger := cfg.Logger.WithField("system", "eventbus")
-	eb, err := NewEventBus(mq, eblogger)
-	if err != nil {
-		return nil, err
-	}
-
 	rpcConfig := &RpcServerOptions{
-		Addr:         cfg.RPCAddr,
-		NodeHTTPAddr: cfg.NodeHTTPAddr,
-		ContractAddr: cfg.ContractAddr,
-		Logger:       cfg.Logger,
-		EB:           eb,
-		Accounts:     accounts,
-		Secret:       cfg.Secret,
-		MKey:         cfg.MKey,
-		MSecret:      cfg.MSecret,
+		Addr:            cfg.RPCAddr,
+		RPCNodeHTTPAddr: cfg.RPCNodeHTTPAddr,
+		ContractAddr:    cfg.StreamManagerContractAddr,
+		Logger:          cfg.Logger,
+		Accounts:        accounts,
+		ClientSecret:    cfg.ClientSecret,
+		ManagerKey:      cfg.ManagerKey,
+		ManagerSecret:   cfg.ManagerSecret,
 	}
 
 	rpc, err := NewRpcServer(rpcConfig)
@@ -55,7 +40,6 @@ func NewService(cfg *Config) (*Service, error) {
 	svc := &Service{
 		cfg: cfg,
 		rpc: rpc,
-		eb:  eb,
 	}
 
 	return svc, nil
@@ -63,11 +47,9 @@ func NewService(cfg *Config) (*Service, error) {
 
 func (s *Service) Start() error {
 	go s.rpc.Start()
-	go s.eb.Start()
 	return nil
 }
 
 func (s *Service) Stop() error {
-	s.eb.Stop()
 	return nil
 }
