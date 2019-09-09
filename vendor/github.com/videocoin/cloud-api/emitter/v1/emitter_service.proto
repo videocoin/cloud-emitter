@@ -21,21 +21,33 @@ service EmitterService {
         };
     }
 
-    rpc RequestStream(StreamRequest) returns (Tx) {}
-    rpc ApproveStream(StreamRequest) returns (Tx) {}
-    rpc CreateStream(StreamRequest) returns (Tx) {}
-    rpc EndStream(StreamRequest) returns (Tx) {}
+    rpc InitStream(InitStreamRequest) returns (google.protobuf.Empty) {}
+    rpc EndStream(EndStreamRequest) returns (google.protobuf.Empty) {}
 
-    // rpc AddInputChunk(AddInputChunkRequest) returns (google.protobuf.Empty) {}
+    rpc AddInputChunkId(AddInputChunkIdRequest) returns (Tx) {}
 }
 
 message Tx {
     bytes hash = 1;
 }
 
-message StreamRequest {
+message InitStreamRequest {
     string user_id = 1;
-    uint64 stream_id = 2;
-    string client_address = 3;
-    repeated string profile_names = 4;
+    uint64 stream_contract_id = 2;
+    repeated string profile_names = 3;
+    uint64 escrow = 4;
 }
+
+message EndStreamRequest {
+    string user_id = 1;
+    uint64 stream_contract_id = 2;
+    string stream_contract_address = 3;
+}
+
+message AddInputChunkIdRequest {
+    uint64 stream_contract_id = 1;
+    uint64 chunk_id = 2;
+    double chunk_duration = 3;
+}
+
+
