@@ -2,13 +2,16 @@ package service
 
 import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
+	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
+	"github.com/videocoin/cloud-emitter/contract"
+	"github.com/videocoin/cloud-emitter/rpc"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"google.golang.org/grpc"
 )
 
 type Service struct {
 	cfg *Config
-	rpc *RpcServer
+	rpc *rpc.RpcServer
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -18,21 +21,39 @@ func NewService(cfg *Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	accounts := accountsv1.NewAccountServiceClient(accountsConn)
 
-	rpcConfig := &RpcServerOptions{
-		Addr:            cfg.RPCAddr,
+	slogger := cfg.Logger.WithField("system", "streamscli")
+	sGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(slogger)
+	streamsConn, err := grpc.Dial(cfg.StreamsRPCAddr, sGrpcDialOpts...)
+	if err != nil {
+		return nil, err
+	}
+	streams := streamsv1.NewStreamServiceClient(streamsConn)
+
+	contractOpts := &contract.ContractClientOpts{
 		RPCNodeHTTPAddr: cfg.RPCNodeHTTPAddr,
 		ContractAddr:    cfg.StreamManagerContractAddr,
-		Logger:          cfg.Logger,
 		Accounts:        accounts,
 		ClientSecret:    cfg.ClientSecret,
 		ManagerKey:      cfg.ManagerKey,
 		ManagerSecret:   cfg.ManagerSecret,
+		Logger:          cfg.Logger.WithField("system", "contract"),
 	}
 
-	rpc, err := NewRpcServer(rpcConfig)
+	contract, err := contract.NewContractClient(contractOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	rpcConfig := &rpc.RpcServerOpts{
+		Addr:     cfg.RPCAddr,
+		Streams:  streams,
+		Contract: contract,
+		Logger:   cfg.Logger.WithField("system", "rpc"),
+	}
+
+	rpc, err := rpc.NewRpcServer(rpcConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -51,5 +72,6 @@ func (s *Service) Start() error {
 }
 
 func (s *Service) Stop() error {
+	go s.rpc.Stop()
 	return nil
 }

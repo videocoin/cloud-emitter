@@ -28,10 +28,7 @@ autoscaler:
 #     memory: 1000Mi
 
 secrets:
-  mqUri: ""
-  contractAddr: ""
-  nodeHttpAddr: ""
-  mKey: ""
-  mSecret: ""
-  secret: ""
+  managerKey: ""
+  managerSecret: ""
+  clientSecret: ""
   sentryDsn: ""
