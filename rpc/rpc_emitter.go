@@ -20,6 +20,18 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 	streamId := new(big.Int).SetUint64(req.StreamContractId)
 
 	go func() {
+		streamStatus := streamsv1.StreamStatusFailed
+		defer func() {
+			_, err := s.streams.Update(ctx, &streamsv1.UpdateStreamRequest{
+				Status: streamStatus,
+			})
+
+			if err != nil {
+				s.logger.WithError(err).Errorf("failed to update stream status to %d on defer", streamStatus)
+				return
+			}
+		}()
+
 		tx, err := s.contract.RequestStream(ctx, req.UserId, streamId, req.ProfileNames)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
@@ -65,6 +77,9 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			s.logger.WithError(err).Error("failed to update stream")
 			return
 		}
+
+		// will be updated on defer
+		streamStatus = streamsv1.StreamStatusPrepared
 
 		_, err = s.contract.AllowRefund(ctx, streamId)
 		if err != nil {
