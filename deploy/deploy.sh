@@ -81,6 +81,7 @@ function deploy() {
         --install \
         --set image.tag="${VERSION}" \
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
+        --set config.streamsRpcAddr="${STREAMS_RPC_ADDR}" \
         --set secrets.streamManagerContractAddr="${CONTRACT_ADDR}" \
         --set secrets.rpcNodeHttpAddr="${RPC_NODE_HTTP_ADDR}" \
         --set secrets.managerKey="${MANAGER_KEY}" \

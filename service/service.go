@@ -72,6 +72,5 @@ func (s *Service) Start() error {
 }
 
 func (s *Service) Stop() error {
-	go s.rpc.Stop()
 	return nil
 }
