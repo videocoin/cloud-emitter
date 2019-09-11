@@ -42,16 +42,16 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: streamsRpcAddr
+            - name: STREAM_MANAGER_CONTRACT_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: streamManagerContractAddr
             - name: RPC_NODE_HTTP_ADDR
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: rpcNodeHttpAddr
-            - name: STREAM_MANAGER_CONTRACT_ADDR
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: streamManagerContractAddr
             - name: MANAGER_KEY
               valueFrom:
                 secretKeyRef:
