@@ -11,18 +11,21 @@ import (
 )
 
 func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*protoempty.Empty, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "InitStream")
+	span, _ := opentracing.StartSpanFromContext(ctx, "InitStream")
 	defer span.Finish()
 
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", req.StreamContractId)
 
-	streamId := new(big.Int).SetUint64(req.StreamContractId)
+	go func(ctx context.Context, req *v1.InitStreamRequest) {
+		_, ctx = opentracing.StartSpanFromContext(ctx, "AsyncInitStream")
 
-	go func() {
+		streamId := new(big.Int).SetUint64(req.StreamContractId)
 		streamStatus := streamsv1.StreamStatusFailed
+
 		defer func() {
-			_, err := s.streams.Update(ctx, &streamsv1.UpdateStreamRequest{
+			_, err := s.streams.UpdateStatus(ctx, &streamsv1.UpdateStreamRequest{
+				Id:     req.StreamId,
 				Status: streamStatus,
 			})
 
@@ -32,13 +35,15 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			}
 		}()
 
-		tx, err := s.contract.RequestStream(ctx, req.UserId, streamId, req.ProfileNames)
+		s.logger.Infof("before request stream: %s %d %v", req.UserId, streamId.Uint64(), req.ProfileNames)
+
+		tx, err := s.contract.RequestStream(context.Background(), req.UserId, streamId, req.ProfileNames)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
 			return
 		}
 
-		_, err = s.contract.WaitMined(ctx, tx)
+		_, err = s.contract.WaitMined(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			return
@@ -50,7 +55,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		_, err = s.contract.WaitMined(ctx, tx)
+		_, err = s.contract.WaitMined(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			return
@@ -62,13 +67,14 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		receipt, err := s.contract.WaitMined(ctx, tx)
+		receipt, err := s.contract.WaitMined(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			return
 		}
 
-		_, err = s.streams.Update(ctx, &streamsv1.UpdateStreamRequest{
+		_, err = s.streams.UpdateStatus(ctx, &streamsv1.UpdateStreamRequest{
+			Id:                    req.StreamId,
 			StreamContractAddress: receipt.ContractAddress.String(),
 			StreamContractId:      streamId.Uint64(),
 		})
@@ -86,7 +92,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			s.logger.WithError(err).Error("failed to allow refund")
 			return
 		}
-	}()
+	}(context.Background(), req)
 
 	return &protoempty.Empty{}, nil
 }
@@ -100,13 +106,15 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 
 	streamId := new(big.Int).SetUint64(req.StreamContractId)
 
-	go func() {
+	go func(ctx context.Context, req *v1.EndStreamRequest) {
+		_, ctx = opentracing.StartSpanFromContext(ctx, "EndStreamAsync")
+
 		tx, err := s.contract.EndStream(ctx, req.UserId, streamId)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
 		}
 
-		_, err = s.contract.WaitMined(ctx, tx)
+		_, err = s.contract.WaitMined(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			// return
@@ -116,7 +124,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
 		}
-	}()
+	}(ctx, req)
 
 	return &protoempty.Empty{}, nil
 }
