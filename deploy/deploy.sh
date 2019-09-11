@@ -67,8 +67,8 @@ function get_vars_ci() {
     readonly STREAMS_RPC_ADDR=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/vars/streamsRpcAddr?raw`
     readonly STREAM_MANAGER_CONTRACT_ADDR=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/vars/streamManagerContractAddr?raw`
     
-    readonly MANAGER_KEY=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/managerKey?raw`
     readonly RPC_NODE_HTTP_ADDR=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/rpcNodeHttpAddr?raw`
+    readonly MANAGER_KEY=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/managerKey?raw`
     readonly MANAGER_SECRET=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/managerSecret?raw`
     readonly CLIENT_SECRET=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/clientSecret?raw`
     readonly SENTRY_DSN=`curl --silent --user ${CONSUL_AUTH} http://consul.${ENV}.videocoin.network/v1/kv/config/${ENV}/services/${CHART_NAME}/secrets/sentryDsn?raw`
@@ -82,7 +82,7 @@ function deploy() {
         --set image.tag="${VERSION}" \
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
         --set config.streamsRpcAddr="${STREAMS_RPC_ADDR}" \
-        --set secrets.streamManagerContractAddr="${CONTRACT_ADDR}" \
+        --set config.streamManagerContractAddr="${STREAM_MANAGER_CONTRACT_ADDR}" \
         --set secrets.rpcNodeHttpAddr="${RPC_NODE_HTTP_ADDR}" \
         --set secrets.managerKey="${MANAGER_KEY}" \
         --set secrets.managerSecret="${MANAGER_SECRET}" \

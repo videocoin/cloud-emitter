@@ -28,6 +28,7 @@ autoscaler:
 #     memory: 1000Mi
 
 secrets:
+  rpcNodeHttpAddr: ""
   managerKey: ""
   managerSecret: ""
   clientSecret: ""
