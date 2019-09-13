@@ -17,6 +17,8 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", req.StreamContractId)
 
+	actx := opentracing.ContextWithSpan(context.Background(), span)
+
 	go func(ctx context.Context, req *v1.InitStreamRequest) {
 		_, ctx = opentracing.StartSpanFromContext(ctx, "AsyncInitStream")
 
@@ -92,22 +94,24 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			s.logger.WithError(err).Error("failed to allow refund")
 			return
 		}
-	}(context.Background(), req)
+	}(actx, req)
 
 	return &protoempty.Empty{}, nil
 }
 
 func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*protoempty.Empty, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
+	span, _ := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", req.StreamContractId)
 
-	streamId := new(big.Int).SetUint64(req.StreamContractId)
+	actx := opentracing.ContextWithSpan(context.Background(), span)
 
 	go func(ctx context.Context, req *v1.EndStreamRequest) {
 		_, ctx = opentracing.StartSpanFromContext(ctx, "EndStreamAsync")
+
+		streamId := new(big.Int).SetUint64(req.StreamContractId)
 
 		tx, err := s.contract.EndStream(ctx, req.UserId, streamId)
 		if err != nil {
@@ -124,7 +128,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
 		}
-	}(ctx, req)
+	}(actx, req)
 
 	return &protoempty.Empty{}, nil
 }
