@@ -37,9 +37,9 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			}
 		}()
 
-		s.logger.Infof("before request stream: %s %d %v", req.UserId, streamId.Uint64(), req.ProfileNames)
+		s.logger.Infof("before request stream: %s %d %v", req.UserId, streamId.Uint64(), req.ProfilesIds)
 
-		tx, err := s.contract.RequestStream(context.Background(), req.UserId, streamId, req.ProfileNames)
+		tx, err := s.contract.RequestStream(context.Background(), req.UserId, streamId, req.ProfilesIds)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
 			return
