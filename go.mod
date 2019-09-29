@@ -20,8 +20,8 @@ require (
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/uber-go/atomic v1.4.0 // indirect
-	github.com/videocoin/cloud-api v0.2.7
-	github.com/videocoin/cloud-pkg v0.0.0-00010101000000-000000000000
+	github.com/videocoin/cloud-api v0.2.13
+	github.com/videocoin/cloud-pkg v0.0.5
 	go.uber.org/atomic v1.4.0 // indirect
 	google.golang.org/grpc v1.21.1
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
