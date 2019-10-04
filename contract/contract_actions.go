@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/opentracing/opentracing-go"
@@ -35,6 +36,21 @@ func (c *ContractClient) RequestStream(
 	}
 
 	return tx, nil
+}
+
+func (c *ContractClient) GetStreamAddress(ctx context.Context, streamId *big.Int) (string, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "GetStreamAddress")
+	defer span.Finish()
+
+	span.SetTag("stream_id", streamId.Uint64())
+
+	c.logger.Infof("get stream address on stream id %d", streamId.Uint64())
+	s, err := c.streamManager.Requests(new(bind.CallOpts), streamId)
+	if err != nil {
+		return "", err
+	}
+
+	return s.Stream.Hex(), nil
 }
 
 func (c *ContractClient) ApproveStream(ctx context.Context, streamId *big.Int) (*types.Transaction, error) {
