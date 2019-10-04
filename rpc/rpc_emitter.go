@@ -45,7 +45,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		_, err = s.contract.WaitMined(tx)
+		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			return
@@ -57,7 +57,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		_, err = s.contract.WaitMined(tx)
+		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			return
@@ -69,15 +69,21 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		receipt, err := s.contract.WaitMined(tx)
+		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			return
 		}
 
+		streamAddress, err := s.contract.GetStreamAddress(ctx, streamId)
+		if err != nil {
+			s.logger.WithError(err).Error("failed to get requests")
+			return
+		}
+
 		_, err = s.streams.UpdateStatus(ctx, &streamsv1.UpdateStreamRequest{
 			Id:                    req.StreamId,
-			StreamContractAddress: receipt.ContractAddress.String(),
+			StreamContractAddress: streamAddress,
 			StreamContractId:      streamId.Uint64(),
 		})
 
@@ -118,7 +124,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 			s.logger.WithError(err).Error("failed to request stream")
 		}
 
-		_, err = s.contract.WaitMined(tx)
+		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
 			// return

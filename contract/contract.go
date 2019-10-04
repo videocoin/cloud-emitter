@@ -107,8 +107,18 @@ func (c *ContractClient) getManagerTransactOpts(ctx context.Context) (*bind.Tran
 	return transactOpts, nil
 }
 
-func (c *ContractClient) WaitMined(tx *types.Transaction) (*types.Receipt, error) {
+func (c *ContractClient) WaitMinedAndCheck(tx *types.Transaction) error {
 	cancelCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	return bind.WaitMined(cancelCtx, c.ethClient, tx)
+
+	receipt, err := bind.WaitMined(cancelCtx, c.ethClient, tx)
+	if err != nil {
+		return err
+	}
+
+	if receipt.Status != types.ReceiptStatusSuccessful {
+		return fmt.Errorf("transaction %s failed", tx.Hash())
+	}
+
+	return nil
 }
