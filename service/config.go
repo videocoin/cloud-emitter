@@ -11,7 +11,7 @@ type Config struct {
 
 	RPCAddr         string `default:"0.0.0.0:5003" envconfig:"RPC_ADDR"`
 	AccountsRPCAddr string `default:"0.0.0.0:5001" envconfig:"ACCOUNTS_RPC_ADDR"`
-	StreamsRPCAddr  string `default:"0.0.0.0:5004" envconfig:"STREAMS_RPC_ADDR"`
+	StreamsRPCAddr  string `default:"0.0.0.0:5002" envconfig:"STREAMS_RPC_ADDR"`
 
 	RPCNodeHTTPAddr           string `default:"" envconfig:"RPC_NODE_HTTP_ADDR"`
 	StreamManagerContractAddr string `default:"" envconfig:"STREAM_MANAGER_CONTRACT_ADDR"`

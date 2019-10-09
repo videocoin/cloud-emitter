@@ -117,7 +117,7 @@ func (c *ContractClient) WaitMinedAndCheck(tx *types.Transaction) error {
 	}
 
 	if receipt.Status != types.ReceiptStatusSuccessful {
-		return fmt.Errorf("transaction %s failed", tx.Hash())
+		return fmt.Errorf("transaction %s failed", tx.Hash().String())
 	}
 
 	return nil

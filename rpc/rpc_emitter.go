@@ -6,6 +6,7 @@ import (
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
+	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 )
@@ -22,7 +23,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 	go func(ctx context.Context, req *v1.InitStreamRequest) {
 		_, ctx = opentracing.StartSpanFromContext(ctx, "AsyncInitStream")
 
-		streamId := new(big.Int).SetUint64(req.StreamContractId)
+		streamID := new(big.Int).SetUint64(req.StreamContractId)
 		streamStatus := streamsv1.StreamStatusFailed
 
 		defer func() {
@@ -37,9 +38,9 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			}
 		}()
 
-		s.logger.Infof("before request stream: %s %d %v", req.UserId, streamId.Uint64(), req.ProfilesIds)
+		s.logger.Infof("before request stream: %s %d %v", req.UserId, streamID.Uint64(), req.ProfilesIds)
 
-		tx, err := s.contract.RequestStream(context.Background(), req.UserId, streamId, req.ProfilesIds)
+		tx, err := s.contract.RequestStream(context.Background(), req.UserId, streamID, req.ProfilesIds)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
 			return
@@ -51,7 +52,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		tx, err = s.contract.ApproveStream(ctx, streamId)
+		tx, err = s.contract.ApproveStream(ctx, streamID)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to approve stream")
 			return
@@ -63,7 +64,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		tx, err = s.contract.CreateStream(ctx, req.UserId, streamId)
+		tx, err = s.contract.CreateStream(ctx, req.UserId, streamID)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to create stream")
 			return
@@ -75,7 +76,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			return
 		}
 
-		streamAddress, err := s.contract.GetStreamAddress(ctx, streamId)
+		streamAddress, err := s.contract.GetStreamAddress(ctx, streamID)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to get requests")
 			return
@@ -84,9 +85,8 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 		_, err = s.streams.UpdateStatus(ctx, &streamsv1.UpdateStreamRequest{
 			Id:                    req.StreamId,
 			StreamContractAddress: streamAddress,
-			StreamContractId:      streamId.Uint64(),
+			StreamContractId:      streamID.Uint64(),
 		})
-
 		if err != nil {
 			s.logger.WithError(err).Error("failed to update stream")
 			return
@@ -95,7 +95,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 		// will be updated on defer
 		streamStatus = streamsv1.StreamStatusPrepared
 
-		_, err = s.contract.AllowRefund(ctx, streamId)
+		_, err = s.contract.AllowRefund(ctx, streamID)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to allow refund")
 			return
@@ -117,17 +117,18 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 	go func(ctx context.Context, req *v1.EndStreamRequest) {
 		_, ctx = opentracing.StartSpanFromContext(ctx, "EndStreamAsync")
 
-		streamId := new(big.Int).SetUint64(req.StreamContractId)
+		streamID := new(big.Int).SetUint64(req.StreamContractId)
 
-		tx, err := s.contract.EndStream(ctx, req.UserId, streamId)
+		tx, err := s.contract.EndStream(ctx, req.UserId, streamID)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to request stream")
+			return
 		}
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			s.logger.WithError(err).Error("failed to wait mined")
-			// return
+			return
 		}
 
 		_, err = s.contract.EscrowRefund(ctx, req.StreamContractAddress)
@@ -139,26 +140,37 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkIdRequest) (*v1.Tx, error) {
+func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkIdRequest) (*protoempty.Empty, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "AddInputChunkId")
 	defer span.Finish()
 
 	span.SetTag("stream_id", req.StreamContractId)
 
-	streamId := new(big.Int).SetUint64(req.StreamContractId)
-	chunkId := new(big.Int).SetUint64(req.ChunkId)
+	streamID := new(big.Int).SetUint64(req.StreamContractId)
+	chunkID := new(big.Int).SetUint64(req.ChunkId)
 
 	// 0.01 const reward
 	reward, _ := big.NewFloat(10000000000000000 * req.ChunkDuration).Int64()
 	rewards := []*big.Int{big.NewInt(reward)}
 
-	tx, err := s.contract.AddInputChunkID(ctx, streamId, chunkId, rewards)
-	if err != nil {
-		s.logger.WithError(err).Error("failed to add input chunk id")
-		return nil, err
-	}
+	s.logger.WithFields(logrus.Fields{
+		"stream_id": streamID,
+		"chunk_id":  chunkID,
+	}).Debugf("calling AddInputChunkID")
 
-	return &v1.Tx{
-		Hash: tx.Hash().Bytes(),
-	}, nil
+	go func() {
+		tx, err := s.contract.AddInputChunkID(ctx, streamID, chunkID, rewards)
+		if err != nil {
+			s.logger.WithError(err).Error("failed to add input chunk id")
+			return
+		}
+
+		err = s.contract.WaitMinedAndCheck(tx)
+		if err != nil {
+			s.logger.WithError(err).Error("failed to wait mined")
+			return
+		}
+	}()
+
+	return &protoempty.Empty{}, nil
 }
