@@ -246,11 +246,12 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 
 	logger.Info("deposit")
 
-	go func(userID string, to *big.Int, logger *logrus.Entry) {
+	go func(userID string, streamID string, to *big.Int, logger *logrus.Entry) {
 		emptyCtx := context.Background()
 		tx, err := s.contract.Deposit(emptyCtx, userID, to, big.NewInt(1000000000000000000))
 		if err != nil {
 			logger.WithError(err).Error("failed to deposit")
+			s.markStreamAsFailed(streamID)
 			return
 		}
 
@@ -259,9 +260,19 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			logger.WithError(err).Error("failed to wait deposit tx")
+			s.markStreamAsFailed(streamID)
 			return
 		}
-	}(req.UserId, to, logger)
+	}(req.UserId, req.StreamId, to, logger)
 
 	return &v1.DepositResponse{}, nil
+}
+
+func (s *RpcServer) markStreamAsFailed(streamID string) error {
+	_, err := s.streams.UpdateStatus(context.Background(), &streamsv1.UpdateStreamRequest{
+		Id:     streamID,
+		Status: streamsv1.StreamStatusFailed,
+	})
+
+	return err
 }

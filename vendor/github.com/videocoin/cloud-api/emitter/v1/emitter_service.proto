@@ -56,8 +56,9 @@ message BalanceResponse {
 
 message DepositRequest {
     string user_id = 1;
-    bytes to = 2;
-    bytes value = 3;
+    string stream_id = 2;
+    bytes to = 3;
+    bytes value = 4;
 }
 
 message DepositResponse {
