@@ -176,8 +176,8 @@ func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkId
 	streamID := new(big.Int).SetUint64(req.StreamContractId)
 	chunkID := new(big.Int).SetUint64(req.ChunkId)
 
-	// 0.1 const reward
-	reward, _ := big.NewFloat(100000000000000000 * req.ChunkDuration).Int64()
+	// 0.01 const reward
+	reward, _ := big.NewFloat(10000000000000000 * req.ChunkDuration).Int64()
 	rewards := []*big.Int{big.NewInt(reward)}
 
 	s.logger.WithFields(logrus.Fields{
