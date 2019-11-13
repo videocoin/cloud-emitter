@@ -55,10 +55,11 @@ message BalanceResponse {
 }
 
 message DepositRequest {
-    bytes from = 1;
+    string user_id = 1;
     bytes to = 2;
     bytes value = 3;
-    string user_id = 4;
 }
 
-message DepositResponse {}
+message DepositResponse {
+    bytes tx_id = 1;
+}

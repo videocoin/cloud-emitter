@@ -151,8 +151,8 @@ func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkId
 	streamID := new(big.Int).SetUint64(req.StreamContractId)
 	chunkID := new(big.Int).SetUint64(req.ChunkId)
 
-	// 0.01 const reward
-	reward, _ := big.NewFloat(10000000000000000 * req.ChunkDuration).Int64()
+	// 0.1 const reward
+	reward, _ := big.NewFloat(100000000000000000 * req.ChunkDuration).Int64()
 	rewards := []*big.Int{big.NewInt(reward)}
 
 	s.logger.WithFields(logrus.Fields{
@@ -204,27 +204,39 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Deposit")
 	defer span.Finish()
 
-	from := new(big.Int).SetBytes(req.From)
 	to := new(big.Int).SetBytes(req.To)
 	value := new(big.Int).SetBytes(req.Value)
 
-	span.SetTag("from", from.String())
-	span.SetTag("to", to.String())
+	toStr := common.BytesToAddress(req.To).String()
+
+	span.SetTag("user_id", req.UserId)
+	span.SetTag("to", toStr)
 	span.SetTag("value", value.String())
 
-	s.logger.WithFields(logrus.Fields{
-		"from":  from.String(),
-		"to":    to.String(),
-		"value": value.String(),
-	}).Debugf("calling Deposit")
+	logger := s.logger.WithFields(logrus.Fields{
+		"user_id": req.UserId,
+		"to":      toStr,
+		"value":   value.String(),
+	})
 
-	tx, err := s.contract.Deposit(ctx, req.UserId, from, to, big.NewInt(100000000000000000))
-	if err != nil {
-		s.logger.WithError(err).Error("failed to deposit")
-		return nil, rpc.ErrRpcInternal
-	}
+	logger.Info("deposit")
 
-	s.logger.Infof("deposit tx: %+v", tx)
+	go func(userID string, to *big.Int, logger *logrus.Entry) {
+		emptyCtx := context.Background()
+		tx, err := s.contract.Deposit(emptyCtx, userID, to, big.NewInt(1000000000000000000))
+		if err != nil {
+			logger.WithError(err).Error("failed to deposit")
+			return
+		}
+
+		logger.Infof("deposit tx %s", tx.Hash().String())
+
+		err = s.contract.WaitMinedAndCheck(tx)
+		if err != nil {
+			logger.WithError(err).Error("failed to wait deposit tx")
+			return
+		}
+	}(req.UserId, to, logger)
 
 	return &v1.DepositResponse{}, nil
 }
