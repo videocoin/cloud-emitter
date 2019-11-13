@@ -40,47 +40,70 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			}
 		}()
 
-		s.logger.Infof("before request stream: %s %d %v", req.UserId, streamID.Uint64(), req.ProfilesIds)
+		logger := s.logger.WithFields(logrus.Fields{
+			"user_id":   req.UserId,
+			"stream_id": streamID.Uint64(),
+		})
+
+		logger.Info("request stream")
 
 		tx, err := s.contract.RequestStream(context.Background(), req.UserId, streamID, req.ProfilesIds)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to request stream")
+			logger.WithError(err).Error("failed to request stream")
 			return
+		}
+
+		if tx != nil {
+			logger.Infof("request stream tx %s", tx.Hash().String())
 		}
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to wait mined")
+			logger.WithError(err).Error("failed to wait mined")
 			return
 		}
+
+		logger.Info("approve stream")
 
 		tx, err = s.contract.ApproveStream(ctx, streamID)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to approve stream")
+			logger.WithError(err).Error("failed to approve stream")
 			return
+		}
+
+		if tx != nil {
+			logger.Infof("approve stream tx %s", tx.Hash().String())
 		}
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to wait mined")
+			logger.WithError(err).Error("failed to wait mined")
 			return
 		}
+
+		logger.Info("create stream")
 
 		tx, err = s.contract.CreateStream(ctx, req.UserId, streamID)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to create stream")
+			logger.WithError(err).Error("failed to create stream")
 			return
+		}
+
+		if tx != nil {
+			logger.Infof("create stream tx %s", tx.Hash().String())
 		}
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to wait mined")
+			logger.WithError(err).Error("failed to wait mined")
 			return
 		}
 
+		logger.Info("get stream address")
+
 		streamAddress, err := s.contract.GetStreamAddress(ctx, streamID)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to get requests")
+			logger.WithError(err).Error("failed to get requests")
 			return
 		}
 
@@ -90,16 +113,18 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 			StreamContractId:      streamID.Uint64(),
 		})
 		if err != nil {
-			s.logger.WithError(err).Error("failed to update stream")
+			logger.WithError(err).Error("failed to update stream")
 			return
 		}
 
 		// will be updated on defer
 		streamStatus = streamsv1.StreamStatusPrepared
 
+		logger.Info("allow refund")
+
 		_, err = s.contract.AllowRefund(ctx, streamID)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to allow refund")
+			logger.WithError(err).Error("failed to allow refund")
 			return
 		}
 	}(actx, req)

@@ -24,7 +24,6 @@ func (c *ContractClient) RequestStream(
 		return nil, err
 	}
 
-	c.logger.Infof("request stream on stream id %d", streamId.Uint64())
 	tx, err := c.streamManager.RequestStream(
 		transactOpts,
 		streamId,
@@ -44,7 +43,6 @@ func (c *ContractClient) GetStreamAddress(ctx context.Context, streamId *big.Int
 
 	span.SetTag("stream_id", streamId.Uint64())
 
-	c.logger.Infof("get stream address on stream id %d", streamId.Uint64())
 	s, err := c.streamManager.Requests(new(bind.CallOpts), streamId)
 	if err != nil {
 		return "", err
@@ -64,7 +62,6 @@ func (c *ContractClient) ApproveStream(ctx context.Context, streamId *big.Int) (
 		return nil, err
 	}
 
-	c.logger.Infof("approve stream creation on stream id %d", streamId.Uint64())
 	tx, err := c.streamManager.ApproveStreamCreation(
 		transactOpts,
 		streamId,
@@ -93,7 +90,6 @@ func (c *ContractClient) CreateStream(ctx context.Context, userId string, stream
 	i, e := big.NewInt(10), big.NewInt(19)
 	transactOpts.Value = i.Exp(i, e, nil)
 
-	c.logger.Infof("create stream on stream id %d", streamId.Uint64())
 	tx, err := c.streamManager.CreateStream(
 		transactOpts,
 		streamId,
@@ -118,7 +114,6 @@ func (c *ContractClient) EndStream(ctx context.Context, userId string, streamId 
 		return nil, err
 	}
 
-	c.logger.Infof("end stream on stream id %d", streamId.Uint64())
 	tx, err := c.streamManager.EndStream(
 		transactOpts,
 		streamId,
@@ -139,7 +134,6 @@ func (c *ContractClient) AllowRefund(ctx context.Context, streamId *big.Int) (*t
 		return nil, err
 	}
 
-	c.logger.Infof("allow refund on stream id %d", streamId.Uint64())
 	tx, err := c.streamManager.AllowRefund(transactOpts, streamId)
 	if err != nil {
 		return nil, nil
