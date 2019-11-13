@@ -122,3 +122,7 @@ func (c *ContractClient) WaitMinedAndCheck(tx *types.Transaction) error {
 
 	return nil
 }
+
+func (c *ContractClient) EthClient() *ethclient.Client {
+	return c.ethClient
+}

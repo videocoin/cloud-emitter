@@ -187,3 +187,25 @@ func (c *ContractClient) AddInputChunkID(
 
 	return tx, nil
 }
+
+func (c *ContractClient) Deposit(ctx context.Context, userID string, from, to, value *big.Int) (*types.Transaction, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "Deposit")
+	defer span.Finish()
+
+	s, err := stream.NewStream(common.BigToAddress(from), c.ethClient)
+	if err != nil {
+		return nil, err
+	}
+
+	opts, err := c.getClientTransactOpts(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := s.Deposit(opts)
+	if err != nil {
+		return tx, err
+	}
+
+	return tx, nil
+}
