@@ -152,7 +152,7 @@ func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkId
 	chunkID := new(big.Int).SetUint64(req.ChunkId)
 
 	// 0.01 const reward
-	reward, _ := big.NewFloat(1000000000000000000).Int64()
+	reward, _ := big.NewFloat(10000000000000000 * req.ChunkDuration).Int64()
 	rewards := []*big.Int{big.NewInt(reward)}
 
 	s.logger.WithFields(logrus.Fields{
@@ -224,7 +224,7 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 		return nil, rpc.ErrRpcInternal
 	}
 
-	s.logger.Debugf("deposit tx: %+v", tx)
+	s.logger.Infof("deposit tx: %+v", tx)
 
 	return &v1.DepositResponse{}, nil
 }
