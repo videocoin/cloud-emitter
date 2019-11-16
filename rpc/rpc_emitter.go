@@ -146,9 +146,11 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 
 		streamID := new(big.Int).SetUint64(req.StreamContractId)
 
+		s.logger.Infof("end stream %s of user %s", streamID.String(), req.UserId)
+
 		tx, err := s.contract.EndStream(ctx, req.UserId, streamID)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to request stream")
+			s.logger.WithError(err).Error("failed to end stream")
 			return
 		}
 
@@ -158,10 +160,14 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 			return
 		}
 
+		s.logger.Info("end stream completed")
+
 		_, err = s.contract.EscrowRefund(ctx, req.StreamContractAddress)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to request stream")
+			s.logger.WithError(err).Error("failed to escrow refund")
 		}
+
+		s.logger.Info("escrow refund completed")
 	}(actx, req)
 
 	return &protoempty.Empty{}, nil
