@@ -6,7 +6,7 @@ GCP_PROJECT=videocoin-network
 NAME=emitter
 VERSION=$$(git describe --abbrev=0)-$$(git rev-parse --abbrev-ref HEAD)-$$(git rev-parse --short HEAD)
 
-ENV?=snb
+ENV?=dev
 
 .PHONY: deploy
 
