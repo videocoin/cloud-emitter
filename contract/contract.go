@@ -70,16 +70,19 @@ func (c *ContractClient) getClientTransactOpts(ctx context.Context, userID strin
 	keyReq := &accountsv1.AccountRequest{OwnerId: userID}
 	key, err := c.accounts.Key(ctx, keyReq)
 	if err != nil {
+		c.logger.WithError(err).WithField("user_id", userID).Error("failed to get account key")
 		return nil, err
 	}
 
 	decrypted, err := keystore.DecryptKey([]byte(key.Key), c.clientSecret)
 	if err != nil {
+		c.logger.WithError(err).WithField("key", []byte(key.Key)).Error("failed to decrypt key")
 		return nil, err
 	}
 
 	transactOpts, err := bcops.GetBCAuth(c.ethClient, decrypted)
 	if err != nil {
+		c.logger.WithError(err).Error("failed to get bc auth")
 		return nil, err
 	}
 
@@ -96,11 +99,13 @@ func (c *ContractClient) getManagerTransactOpts(ctx context.Context) (*bind.Tran
 
 	decrypted, err := keystore.DecryptKey([]byte(c.managerKey), c.managerSecret)
 	if err != nil {
+		c.logger.WithError(err).WithField("key", []byte(c.managerKey)).Error("failed to decrypt key")
 		return nil, err
 	}
 
 	transactOpts, err := bcops.GetBCAuth(c.ethClient, decrypted)
 	if err != nil {
+		c.logger.WithError(err).Error("failed to get bc auth")
 		return nil, err
 	}
 

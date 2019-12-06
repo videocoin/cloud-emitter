@@ -21,6 +21,7 @@ func (c *ContractClient) RequestStream(
 
 	transactOpts, err := c.getClientTransactOpts(ctx, userId)
 	if err != nil {
+		c.logger.WithError(err).Error("failed to get client transact opts")
 		return nil, err
 	}
 
