@@ -32,7 +32,7 @@ require (
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3 // indirect
 	github.com/tyler-smith/go-bip39 v1.0.2 // indirect
 	github.com/uber-go/atomic v1.4.0 // indirect
-	github.com/videocoin/cloud-api v0.2.14
+	github.com/videocoin/cloud-api v0.2.15
 	github.com/videocoin/cloud-pkg v0.0.6
 	github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208 // indirect
 	go.uber.org/atomic v1.4.0 // indirect
