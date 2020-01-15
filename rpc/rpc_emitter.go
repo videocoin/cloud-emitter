@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"math/big"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	protoempty "github.com/gogo/protobuf/types"
@@ -83,7 +84,19 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 
 		logger.Info("create stream")
 
-		tx, err = s.contract.CreateStream(ctx, req.UserId, streamID)
+		i, e := big.NewInt(10), big.NewInt(19)
+		deposit := i.Exp(i, e, nil)
+
+		if req.Deposit != "" {
+			d, err := strconv.ParseInt(req.Deposit, 10, 64)
+			if err == nil {
+				deposit = big.NewInt(d)
+			} else {
+				s.logger.WithField("deposit", req.Deposit).WithError(err).Error("failed to apply custom deposit")
+			}
+		}
+
+		tx, err = s.contract.CreateStream(ctx, req.UserId, streamID, deposit)
 		if err != nil {
 			logger.WithError(err).Error("failed to create stream")
 			return
@@ -182,8 +195,17 @@ func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkId
 	streamID := new(big.Int).SetUint64(req.StreamContractId)
 	chunkID := new(big.Int).SetUint64(req.ChunkId)
 
-	// 0.01 const reward
+	// 0.01 reward by default
 	reward, _ := big.NewFloat(10000000000000000 * req.ChunkDuration).Int64()
+	if req.Reward != "" {
+		r, err := strconv.ParseFloat(req.Reward, 64)
+		if err == nil {
+			reward, _ = big.NewFloat(r * req.ChunkDuration).Int64()
+		} else {
+			s.logger.WithField("reward", req.Reward).WithError(err).Error("failed to apply custom reward")
+		}
+	}
+
 	rewards := []*big.Int{big.NewInt(reward)}
 
 	s.logger.WithFields(logrus.Fields{

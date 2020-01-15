@@ -74,7 +74,7 @@ func (c *ContractClient) ApproveStream(ctx context.Context, streamId *big.Int) (
 	return tx, nil
 }
 
-func (c *ContractClient) CreateStream(ctx context.Context, userId string, streamId *big.Int) (*types.Transaction, error) {
+func (c *ContractClient) CreateStream(ctx context.Context, userId string, streamId, deposit *big.Int) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
 	defer span.Finish()
 
@@ -87,9 +87,7 @@ func (c *ContractClient) CreateStream(ctx context.Context, userId string, stream
 		return nil, err
 	}
 
-	// todo: constant value ???
-	i, e := big.NewInt(10), big.NewInt(19)
-	transactOpts.Value = i.Exp(i, e, nil)
+	transactOpts.Value = deposit
 
 	tx, err := c.streamManager.CreateStream(
 		transactOpts,
