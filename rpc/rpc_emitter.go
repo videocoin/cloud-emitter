@@ -276,7 +276,7 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 
 	go func(userID string, streamID string, to *big.Int, logger *logrus.Entry) {
 		emptyCtx := context.Background()
-		tx, err := s.contract.Deposit(emptyCtx, userID, to, big.NewInt(1000000000000000000))
+		tx, err := s.contract.Deposit(emptyCtx, userID, to, value)
 		if err != nil {
 			logger.WithError(err).Error("failed to deposit")
 			s.markStreamAsFailed(streamID)
