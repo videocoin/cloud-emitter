@@ -13,7 +13,7 @@ import (
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 )
 
-func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*protoempty.Empty, error) {
+func (s *Server) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*protoempty.Empty, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "InitStream")
 	defer span.Finish()
 
@@ -132,7 +132,7 @@ func (s *RpcServer) InitStream(ctx context.Context, req *v1.InitStreamRequest) (
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*protoempty.Empty, error) {
+func (s *Server) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*protoempty.Empty, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
@@ -173,7 +173,7 @@ func (s *RpcServer) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*p
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkIdRequest) (*protoempty.Empty, error) {
+func (s *Server) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkIdRequest) (*protoempty.Empty, error) {  // nolint
 	span, ctx := opentracing.StartSpanFromContext(ctx, "AddInputChunkId")
 	defer span.Finish()
 
@@ -208,7 +208,7 @@ func (s *RpcServer) AddInputChunkId(ctx context.Context, req *v1.AddInputChunkId
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) GetBalance(ctx context.Context, req *v1.BalanceRequest) (*v1.BalanceResponse, error) {
+func (s *Server) GetBalance(ctx context.Context, req *v1.BalanceRequest) (*v1.BalanceResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "GetBalance")
 	defer span.Finish()
 
@@ -231,8 +231,8 @@ func (s *RpcServer) GetBalance(ctx context.Context, req *v1.BalanceRequest) (*v1
 	}, nil
 }
 
-func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.DepositResponse, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Deposit")
+func (s *Server) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.DepositResponse, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "Deposit")
 	defer span.Finish()
 
 	to := new(big.Int).SetBytes(req.To)
@@ -257,7 +257,10 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 		tx, err := s.contract.Deposit(emptyCtx, userID, to, big.NewInt(1000000000000000000))
 		if err != nil {
 			logger.WithError(err).Error("failed to deposit")
-			s.markStreamAsFailed(streamID)
+			err = s.markStreamAsFailed(streamID)
+			if err != nil {
+				logger.WithError(err).Error("failed to mark stream as failed")
+			}
 			return
 		}
 
@@ -266,7 +269,10 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			logger.WithError(err).Error("failed to wait deposit tx")
-			s.markStreamAsFailed(streamID)
+			err = s.markStreamAsFailed(streamID)
+			if err != nil {
+				logger.WithError(err).Error("failed to mark stream as failed")
+			}
 			return
 		}
 	}(req.UserId, req.StreamId, to, logger)
@@ -274,7 +280,7 @@ func (s *RpcServer) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.De
 	return &v1.DepositResponse{}, nil
 }
 
-func (s *RpcServer) markStreamAsFailed(streamID string) error {
+func (s *Server) markStreamAsFailed(streamID string) error {
 	_, err := s.streams.UpdateStatus(context.Background(), &streamsv1.UpdateStreamRequest{
 		Id:     streamID,
 		Status: streamsv1.StreamStatusFailed,

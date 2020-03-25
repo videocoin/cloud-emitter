@@ -1,15 +1,16 @@
 package main
 
 import (
+	stdlog "log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/kelseyhightower/envconfig"
+	"github.com/sirupsen/logrus"
 	"github.com/videocoin/cloud-emitter/service"
 	"github.com/videocoin/cloud-pkg/logger"
 	"github.com/videocoin/cloud-pkg/tracer"
-	"github.com/kelseyhightower/envconfig"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -18,7 +19,10 @@ var (
 )
 
 func main() {
-	logger.Init(ServiceName, Version)
+	err := logger.Init(ServiceName, Version)
+	if err != nil {
+		stdlog.Fatalf("Failed to init logger: %s", err)
+	}
 
 	log := logrus.NewEntry(logrus.New())
 	log = logrus.WithFields(logrus.Fields{

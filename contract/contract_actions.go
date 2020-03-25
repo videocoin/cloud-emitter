@@ -11,15 +11,15 @@ import (
 	"github.com/videocoin/cloud-pkg/stream"
 )
 
-func (c *ContractClient) RequestStream(
-	ctx context.Context, userId string, streamId *big.Int, profileNames []string) (*types.Transaction, error) {
+func (c *Client) RequestStream(
+	ctx context.Context, userID string, streamID *big.Int, profileNames []string) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
 	defer span.Finish()
 
-	span.SetTag("user_id", userId)
-	span.SetTag("stream_id", streamId.Uint64())
+	span.SetTag("user_id", userID)
+	span.SetTag("stream_id", streamID.Uint64())
 
-	transactOpts, err := c.getClientTransactOpts(ctx, userId)
+	transactOpts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
 		c.logger.WithError(err).Error("failed to get client transact opts")
 		return nil, err
@@ -27,7 +27,7 @@ func (c *ContractClient) RequestStream(
 
 	tx, err := c.streamManager.RequestStream(
 		transactOpts,
-		streamId,
+		streamID,
 		profileNames,
 	)
 
@@ -38,13 +38,13 @@ func (c *ContractClient) RequestStream(
 	return tx, nil
 }
 
-func (c *ContractClient) GetStreamAddress(ctx context.Context, streamId *big.Int) (string, error) {
+func (c *Client) GetStreamAddress(ctx context.Context, streamID *big.Int) (string, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "GetStreamAddress")
 	defer span.Finish()
 
-	span.SetTag("stream_id", streamId.Uint64())
+	span.SetTag("stream_id", streamID.Uint64())
 
-	s, err := c.streamManager.Requests(new(bind.CallOpts), streamId)
+	s, err := c.streamManager.Requests(new(bind.CallOpts), streamID)
 	if err != nil {
 		return "", err
 	}
@@ -52,11 +52,11 @@ func (c *ContractClient) GetStreamAddress(ctx context.Context, streamId *big.Int
 	return s.Stream.Hex(), nil
 }
 
-func (c *ContractClient) ApproveStream(ctx context.Context, streamId *big.Int) (*types.Transaction, error) {
+func (c *Client) ApproveStream(ctx context.Context, streamID *big.Int) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStream")
 	defer span.Finish()
 
-	span.SetTag("stream_id", streamId.Uint64())
+	span.SetTag("stream_id", streamID.Uint64())
 
 	transactOpts, err := c.getManagerTransactOpts(ctx)
 	if err != nil {
@@ -65,7 +65,7 @@ func (c *ContractClient) ApproveStream(ctx context.Context, streamId *big.Int) (
 
 	tx, err := c.streamManager.ApproveStreamCreation(
 		transactOpts,
-		streamId,
+		streamID,
 	)
 	if err != nil {
 		return nil, err
@@ -74,14 +74,14 @@ func (c *ContractClient) ApproveStream(ctx context.Context, streamId *big.Int) (
 	return tx, nil
 }
 
-func (c *ContractClient) CreateStream(ctx context.Context, userId string, streamId *big.Int) (*types.Transaction, error) {
+func (c *Client) CreateStream(ctx context.Context, userID string, streamID *big.Int) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
 	defer span.Finish()
 
-	span.SetTag("user_id", userId)
-	span.SetTag("stream_id", streamId.Uint64())
+	span.SetTag("user_id", userID)
+	span.SetTag("stream_id", streamID.Uint64())
 
-	transactOpts, err := c.getClientTransactOpts(ctx, userId)
+	transactOpts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
 		c.logger.Error(err)
 		return nil, err
@@ -93,7 +93,7 @@ func (c *ContractClient) CreateStream(ctx context.Context, userId string, stream
 
 	tx, err := c.streamManager.CreateStream(
 		transactOpts,
-		streamId,
+		streamID,
 	)
 	if err != nil {
 		c.logger.Error(err)
@@ -103,21 +103,21 @@ func (c *ContractClient) CreateStream(ctx context.Context, userId string, stream
 	return tx, nil
 }
 
-func (c *ContractClient) EndStream(ctx context.Context, userId string, streamId *big.Int) (*types.Transaction, error) {
+func (c *Client) EndStream(ctx context.Context, userID string, streamID *big.Int) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
-	span.SetTag("user_id", userId)
-	span.SetTag("stream_id", streamId.Uint64())
+	span.SetTag("user_id", userID)
+	span.SetTag("stream_id", streamID.Uint64())
 
-	transactOpts, err := c.getClientTransactOpts(ctx, userId)
+	transactOpts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	tx, err := c.streamManager.EndStream(
 		transactOpts,
-		streamId,
+		streamID,
 	)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (c *ContractClient) EndStream(ctx context.Context, userId string, streamId 
 	return tx, nil
 }
 
-func (c *ContractClient) AllowRefund(ctx context.Context, streamId *big.Int) (*types.Transaction, error) {
+func (c *Client) AllowRefund(ctx context.Context, streamID *big.Int) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "AllowRefund")
 	defer span.Finish()
 
@@ -135,7 +135,7 @@ func (c *ContractClient) AllowRefund(ctx context.Context, streamId *big.Int) (*t
 		return nil, err
 	}
 
-	tx, err := c.streamManager.AllowRefund(transactOpts, streamId)
+	tx, err := c.streamManager.AllowRefund(transactOpts, streamID)
 	if err != nil {
 		return nil, nil
 	}
@@ -143,7 +143,7 @@ func (c *ContractClient) AllowRefund(ctx context.Context, streamId *big.Int) (*t
 	return tx, nil
 }
 
-func (c *ContractClient) EscrowRefund(ctx context.Context, streamContractAddress string) (*types.Transaction, error) {
+func (c *Client) EscrowRefund(ctx context.Context, streamContractAddress string) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EscrowRefund")
 	defer span.Finish()
 
@@ -165,9 +165,9 @@ func (c *ContractClient) EscrowRefund(ctx context.Context, streamContractAddress
 	return tx, nil
 }
 
-func (c *ContractClient) AddInputChunkID(
-	ctx context.Context, streamId, chunkId *big.Int, rewards []*big.Int) (*types.Transaction, error) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "addInputChunkId")
+func (c *Client) AddInputChunkID(
+	ctx context.Context, streamID, chunkID *big.Int, rewards []*big.Int) (*types.Transaction, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "addInputchunkId")
 	defer span.Finish()
 
 	transactOpts, err := c.getManagerTransactOpts(ctx)
@@ -175,7 +175,7 @@ func (c *ContractClient) AddInputChunkID(
 		return nil, err
 	}
 
-	tx, err := c.streamManager.AddInputChunkId(transactOpts, streamId, chunkId, rewards)
+	tx, err := c.streamManager.AddInputChunkId(transactOpts, streamID, chunkID, rewards)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +183,7 @@ func (c *ContractClient) AddInputChunkID(
 	return tx, nil
 }
 
-func (c *ContractClient) Deposit(ctx context.Context, userID string, to, value *big.Int) (*types.Transaction, error) {
+func (c *Client) Deposit(ctx context.Context, userID string, to, value *big.Int) (*types.Transaction, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "Deposit")
 	defer span.Finish()
 

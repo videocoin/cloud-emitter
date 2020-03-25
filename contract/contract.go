@@ -18,7 +18,7 @@ import (
 	sm "github.com/videocoin/cloud-pkg/streamManager"
 )
 
-type ContractClientOpts struct {
+type ClientOpts struct {
 	RPCNodeHTTPAddr string
 	ContractAddr    string
 	Logger          *logrus.Entry
@@ -28,7 +28,7 @@ type ContractClientOpts struct {
 	ManagerSecret   string
 }
 
-type ContractClient struct {
+type Client struct {
 	accounts      accountsv1.AccountServiceClient
 	ethClient     *ethclient.Client
 	streamManager *sm.Manager
@@ -40,7 +40,7 @@ type ContractClient struct {
 	logger *logrus.Entry
 }
 
-func NewContractClient(opts *ContractClientOpts) (*ContractClient, error) {
+func NewContractClient(opts *ClientOpts) (*Client, error) {
 	ethClient, err := ethclient.Dial(opts.RPCNodeHTTPAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
@@ -52,7 +52,7 @@ func NewContractClient(opts *ContractClientOpts) (*ContractClient, error) {
 		return nil, fmt.Errorf("failed to create smart contract stream manager: %s", err.Error())
 	}
 
-	return &ContractClient{
+	return &Client{
 		accounts:      opts.Accounts,
 		ethClient:     ethClient,
 		streamManager: manager,
@@ -63,7 +63,7 @@ func NewContractClient(opts *ContractClientOpts) (*ContractClient, error) {
 	}, nil
 }
 
-func (c *ContractClient) getClientTransactOpts(ctx context.Context, userID string) (*bind.TransactOpts, error) {
+func (c *Client) getClientTransactOpts(ctx context.Context, userID string) (*bind.TransactOpts, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "getClientTransactOpts")
 	defer span.Finish()
 
@@ -93,7 +93,7 @@ func (c *ContractClient) getClientTransactOpts(ctx context.Context, userID strin
 	return transactOpts, nil
 }
 
-func (c *ContractClient) getManagerTransactOpts(ctx context.Context) (*bind.TransactOpts, error) {
+func (c *Client) getManagerTransactOpts(ctx context.Context) (*bind.TransactOpts, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "getManagerTransactOpts")
 	defer span.Finish()
 
@@ -112,7 +112,7 @@ func (c *ContractClient) getManagerTransactOpts(ctx context.Context) (*bind.Tran
 	return transactOpts, nil
 }
 
-func (c *ContractClient) WaitMinedAndCheck(tx *types.Transaction) error {
+func (c *Client) WaitMinedAndCheck(tx *types.Transaction) error {
 	cancelCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -128,6 +128,6 @@ func (c *ContractClient) WaitMinedAndCheck(tx *types.Transaction) error {
 	return nil
 }
 
-func (c *ContractClient) EthClient() *ethclient.Client {
+func (c *Client) EthClient() *ethclient.Client {
 	return c.ethClient
 }
