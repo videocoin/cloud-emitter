@@ -5,7 +5,6 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
@@ -196,28 +195,31 @@ func (s *Server) AddInputChunk(ctx context.Context, req *v1.AddInputChunkRequest
 	streamID := new(big.Int).SetUint64(req.StreamContractId)
 	chunkID := new(big.Int).SetUint64(req.ChunkId)
 
-	reward, _ := big.NewFloat(0).Mul(big.NewFloat(req.Reward), big.NewFloat(1000000000000000000)).Int64()
+	reward, _ := new(big.Float).Mul(big.NewFloat(req.Reward), big.NewFloat(1000000000000000000)).Int64()
 	rewards := []*big.Int{big.NewInt(reward)}
 
 	logger := s.logger.WithFields(logrus.Fields{
-		"stream_id": streamID,
-		"chunk_id":  chunkID,
+		"stream_id":  streamID,
+		"chunk_id":   chunkID,
+		"reward":     reward,
+		"req_reward": req.Reward,
 	})
+
 	logger.Debugf("calling AddInputChunkID")
 
-	tx, err := s.contract.AddInputChunkID(ctx, streamID, chunkID, rewards)
-	if err != nil {
-		logger.WithError(err).Error("failed to call addInputChunkId")
-		return nil, rpc.NewRpcInternalError(err)
-	}
+	go func() {
+		tx, err := s.contract.AddInputChunkID(ctx, streamID, chunkID, rewards)
+		if err != nil {
+			logger.WithError(err).Error("failed to call addInputChunkId")
+			return
+		}
 
-	go func(tx *ethtypes.Transaction) {
-		err := s.contract.WaitMinedAndCheck(tx)
+		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
 			logger.WithError(err).WithField("call", "addInputChunkId").Error("failed to wait mined")
 			return
 		}
-	}(tx)
+	}()
 
 	return new(protoempty.Empty), nil
 }
