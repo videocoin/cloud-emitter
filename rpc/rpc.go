@@ -61,7 +61,7 @@ func (s *Server) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*pr
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
-			logger.WithError(err).Error("failed to wait mined")
+			logger.WithError(err).WithField("call", "RequestStream").Error("failed to wait mined")
 			return
 		}
 
@@ -79,7 +79,7 @@ func (s *Server) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*pr
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
-			logger.WithError(err).Error("failed to wait mined")
+			logger.WithError(err).WithField("call", "ApproveStream").Error("failed to wait mined")
 			return
 		}
 
@@ -97,7 +97,7 @@ func (s *Server) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*pr
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
-			logger.WithError(err).Error("failed to wait mined")
+			logger.WithError(err).WithField("call", "CreateStream").Error("failed to wait mined")
 			return
 		}
 
@@ -158,7 +158,7 @@ func (s *Server) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*prot
 
 		err = s.contract.WaitMinedAndCheck(tx)
 		if err != nil {
-			s.logger.WithError(err).Error("failed to wait mined")
+			s.logger.WithError(err).WithField("call", "EndStream").Error("failed to wait mined")
 			return
 		}
 
