@@ -165,8 +165,7 @@ func (c *Client) EscrowRefund(ctx context.Context, streamContractAddress string)
 	return tx, nil
 }
 
-func (c *Client) AddInputChunkID(
-	ctx context.Context, streamID, chunkID *big.Int, rewards []*big.Int) (*types.Transaction, error) {
+func (c *Client) AddInputChunkID(ctx context.Context, streamID, chunkID *big.Int, rewards []*big.Int) (*types.Transaction, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "addInputchunkId")
 	defer span.Finish()
 
