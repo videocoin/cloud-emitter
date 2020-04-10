@@ -11,8 +11,7 @@ import (
 	"github.com/videocoin/cloud-pkg/stream"
 )
 
-func (c *Client) RequestStream(
-	ctx context.Context, userID string, streamID *big.Int, profileNames []string) (*types.Transaction, error) {
+func (c *Client) RequestStream(ctx context.Context, userID string, streamID *big.Int, profileNames []string) (*types.Transaction, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
 	defer span.Finish()
 
@@ -25,12 +24,7 @@ func (c *Client) RequestStream(
 		return nil, err
 	}
 
-	tx, err := c.streamManager.RequestStream(
-		transactOpts,
-		streamID,
-		profileNames,
-	)
-
+	tx, err := c.streamManager.RequestStream(transactOpts, streamID, profileNames)
 	if err != nil {
 		return nil, err
 	}

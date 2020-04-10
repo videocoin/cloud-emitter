@@ -10,47 +10,45 @@ import (
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
+	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
 type ServerOpts struct {
-	Addr string
-
+	Logger   *logrus.Entry
+	Addr     string
 	Streams  streamsv1.StreamServiceClient
 	Contract *contract.Client
-
-	Logger *logrus.Entry
 }
 
 type Server struct {
-	addr   string
-	grpc   *grpc.Server
-	listen net.Listener
-
+	logger   *logrus.Entry
+	addr     string
+	grpc     *grpc.Server
+	listen   net.Listener
 	streams  streamsv1.StreamServiceClient
 	contract *contract.Client
-
-	logger *logrus.Entry
 }
 
 func NewRPCServer(opts *ServerOpts) (*Server, error) {
 	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
 	grpcServer := grpc.NewServer(grpcOpts...)
+
 	healthService := health.NewServer()
-	grpc_health_v1.RegisterHealthServer(grpcServer, healthService)
+	healthv1.RegisterHealthServer(grpcServer, healthService)
+
 	listen, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
 		return nil, err
 	}
 
 	rpcServer := &Server{
+		logger:   opts.Logger,
 		addr:     opts.Addr,
 		grpc:     grpcServer,
 		listen:   listen,
 		streams:  opts.Streams,
 		contract: opts.Contract,
-		logger:   opts.Logger,
 	}
 
 	v1.RegisterEmitterServiceServer(grpcServer, rpcServer)
