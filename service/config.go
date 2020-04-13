@@ -6,19 +6,18 @@ import (
 
 // Config primary config for emitter
 type Config struct {
-	Name    string `envconfig:"-"`
-	Version string `envconfig:"-"`
+	Name    string        `envconfig:"-"`
+	Version string        `envconfig:"-"`
+	Logger  *logrus.Entry `envconfig:"-"`
 
-	RPCAddr         string `default:"0.0.0.0:5003" envconfig:"RPC_ADDR"`
-	AccountsRPCAddr string `default:"0.0.0.0:5001" envconfig:"ACCOUNTS_RPC_ADDR"`
-	StreamsRPCAddr  string `default:"0.0.0.0:5002" envconfig:"STREAMS_RPC_ADDR"`
+	RPCAddr         string `envconfig:"RPC_ADDR" default:"0.0.0.0:5003"`
+	AccountsRPCAddr string `envconfig:"ACCOUNTS_RPC_ADDR" default:"0.0.0.0:5001"`
+	StreamsRPCAddr  string `envconfig:"STREAMS_RPC_ADDR" default:"0.0.0.0:5002"`
 
-	RPCNodeHTTPAddr           string `default:"" envconfig:"RPC_NODE_HTTP_ADDR"`
-	StreamManagerContractAddr string `default:"" envconfig:"STREAM_MANAGER_CONTRACT_ADDR"`
+	RPCNodeHTTPAddr           string `envconfig:"RPC_NODE_HTTP_ADDR" required:"true"`
+	StreamManagerContractAddr string `envconfig:"STREAM_MANAGER_CONTRACT_ADDR" required:"true"`
 
-	ManagerKey    string `default:"" envconfig:"MANAGER_KEY"`
-	ManagerSecret string `default:"" envconfig:"MANAGER_SECRET"`
-	ClientSecret  string `default:"" envconfig:"CLIENT_SECRET"`
-
-	Logger *logrus.Entry `envconfig:"-"`
+	ManagerKey    string `envconfig:"MANAGER_KEY" required:"true"`
+	ManagerSecret string `envconfig:"MANAGER_SECRET" required:"true"`
+	ClientSecret  string `envconfig:"CLIENT_SECRET" required:"true"`
 }
