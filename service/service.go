@@ -4,14 +4,17 @@ import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-emitter/contract"
+	"github.com/videocoin/cloud-emitter/manager"
 	"github.com/videocoin/cloud-emitter/rpc"
+	faucetcli "github.com/videocoin/cloud-pkg/faucet"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"google.golang.org/grpc"
 )
 
 type Service struct {
-	cfg *Config
-	rpc *rpc.Server
+	cfg     *Config
+	rpc     *rpc.Server
+	manager *manager.Manager
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -58,9 +61,22 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
+	faucet := faucetcli.NewClient(cfg.FaucetURL)
+	managerOpts := &manager.Opts{
+		Logger:   cfg.Logger.WithField("system", "manager"),
+		Faucet:   faucet,
+		Accounts: accounts,
+		Contract: contract,
+	}
+	manager, err := manager.NewManager(managerOpts)
+	if err != nil {
+		return nil, err
+	}
+
 	svc := &Service{
-		cfg: cfg,
-		rpc: rpc,
+		cfg:     cfg,
+		rpc:     rpc,
+		manager: manager,
 	}
 
 	return svc, nil
@@ -70,8 +86,11 @@ func (s *Service) Start(errCh chan error) {
 	go func() {
 		errCh <- s.rpc.Start()
 	}()
+
+	s.manager.StartBackgroundTasks()
 }
 
 func (s *Service) Stop() error {
+	s.manager.StopBackgroundTasks()
 	return nil
 }

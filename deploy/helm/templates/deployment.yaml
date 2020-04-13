@@ -55,6 +55,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: streamManagerContractAddr
+            - name: FAUCET_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: faucetUrl
             - name: RPC_NODE_HTTP_ADDR
               valueFrom:
                 secretKeyRef:

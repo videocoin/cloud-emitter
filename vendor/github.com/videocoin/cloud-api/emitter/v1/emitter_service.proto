@@ -42,7 +42,6 @@ message EndStreamRequest {
 message AddInputChunkRequest {
     uint64 stream_contract_id = 1;
     uint64 chunk_id = 2;
-    double chunk_duration = 3;
     double reward = 4;
 }
 

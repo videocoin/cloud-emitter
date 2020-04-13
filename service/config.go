@@ -16,6 +16,7 @@ type Config struct {
 
 	RPCNodeHTTPAddr           string `envconfig:"RPC_NODE_HTTP_ADDR" required:"true"`
 	StreamManagerContractAddr string `envconfig:"STREAM_MANAGER_CONTRACT_ADDR" required:"true"`
+	FaucetURL                 string `envconfig:"FAUCET_URL" required:"true"`
 
 	ManagerKey    string `envconfig:"MANAGER_KEY" required:"true"`
 	ManagerSecret string `envconfig:"MANAGER_SECRET" required:"true"`
