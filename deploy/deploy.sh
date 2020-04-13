@@ -55,10 +55,12 @@ function get_vars() {
     readonly STREAM_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/streamManagerContractAddr`
     readonly FAUCET_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/faucetUrl`
 
-    readonly MANAGER_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/managerKey`
     readonly RPC_NODE_HTTP_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/rpcNodeHttpAddr`
+    readonly MANAGER_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/managerKey`
     readonly MANAGER_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/managerSecret`
     readonly CLIENT_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/clientSecret`
+    readonly VALIDATOR_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/validatorKey`
+    readonly VALIDATOR_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/validatorSecret`
     readonly SENTRY_DSN=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/sentryDsn`
 }
 
@@ -77,6 +79,8 @@ function deploy() {
         --set secrets.managerKey="${MANAGER_KEY}" \
         --set secrets.managerSecret="${MANAGER_SECRET}" \
         --set secrets.clientSecret="${CLIENT_SECRET}" \
+        --set secrets.validatorKey="${VALIDATOR_KEY}" \
+        --set secrets.validatorSecret="${VALIDATOR_SECRET}" \
         --set secrets.sentryDsn="${SENTRY_DSN}" \
         --wait ${CHART_NAME} ${CHART_DIR}
 }

@@ -18,7 +18,9 @@ type Config struct {
 	StreamManagerContractAddr string `envconfig:"STREAM_MANAGER_CONTRACT_ADDR" required:"true"`
 	FaucetURL                 string `envconfig:"FAUCET_URL" required:"true"`
 
-	ManagerKey    string `envconfig:"MANAGER_KEY" required:"true"`
-	ManagerSecret string `envconfig:"MANAGER_SECRET" required:"true"`
-	ClientSecret  string `envconfig:"CLIENT_SECRET" required:"true"`
+	ManagerKey      string `envconfig:"MANAGER_KEY" required:"true"`
+	ManagerSecret   string `envconfig:"MANAGER_SECRET" required:"true"`
+	ClientSecret    string `envconfig:"CLIENT_SECRET" required:"true"`
+	ValidatorKey    string `envconfig:"VALIDATOR_KEY" required:"true"`
+	ValidatorSecret string `envconfig:"VALIDATOR_SECRET" required:"true"`
 }

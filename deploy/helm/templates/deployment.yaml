@@ -75,6 +75,16 @@ spec:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: managerSecret
+            - name: VALIDATOR_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: validatorKey
+            - name: VALIDATOR_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: validatorSecret
             - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:

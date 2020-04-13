@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
+	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	"google.golang.org/grpc/codes"
@@ -91,5 +92,87 @@ func (s *Server) GetBalance(ctx context.Context, req *v1.BalanceRequest) (*v1.Ba
 	return &v1.BalanceResponse{
 		Address: req.Address,
 		Value:   value.Bytes(),
+	}, nil
+}
+
+func (s *Server) ValidateProof(ctx context.Context, req *v1.ValidateProofRequest) (*v1.ValidateProofResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+
+	profileID := new(big.Int).SetBytes(req.ProfileId)
+	chunkID := new(big.Int).SetBytes(req.ChunkId)
+
+	span.SetTag("stream_contract_address", req.StreamContractAddress)
+	span.SetTag("profile_id", profileID.String())
+	span.SetTag("chunk_id", chunkID.String())
+
+	logger := s.logger.WithFields(logrus.Fields{
+		"stream_contract_address": req.StreamContractAddress,
+		"profile_id":              profileID.String(),
+		"chunk_id":                chunkID.String(),
+	})
+
+	logger.Info("validate proof")
+
+	tx, err := s.contract.ValidateProof(ctx, req.StreamContractAddress, profileID, chunkID)
+	if err != nil {
+		logger.
+			WithError(err).
+			Error("failed to validate proof")
+		return nil, rpc.ErrRpcInternal
+	}
+
+	err = s.contract.WaitMinedAndCheck(tx)
+	if err != nil {
+		logger.
+			WithError(err).
+			WithField("call", "ValidateProof").
+			WithField("tx", tx.Hash().String()).
+			Error("failed to wait mined")
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return &v1.ValidateProofResponse{
+		TxId: tx.Hash().Bytes(),
+	}, nil
+}
+
+func (s *Server) ScrapProof(ctx context.Context, req *v1.ScrapProofRequest) (*v1.ScrapProofResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+
+	profileID := new(big.Int).SetBytes(req.ProfileId)
+	chunkID := new(big.Int).SetBytes(req.ChunkId)
+
+	span.SetTag("stream_contract_address", req.StreamContractAddress)
+	span.SetTag("profile_id", profileID.String())
+	span.SetTag("chunk_id", chunkID.String())
+
+	logger := s.logger.WithFields(logrus.Fields{
+		"stream_contract_address": req.StreamContractAddress,
+		"profile_id":              profileID.String(),
+		"chunk_id":                chunkID.String(),
+	})
+
+	logger.Info("scrap proof")
+
+	tx, err := s.contract.ScrapProof(ctx, req.StreamContractAddress, profileID, chunkID)
+	if err != nil {
+		logger.
+			WithError(err).
+			Error("failed to validate proof")
+		return nil, rpc.ErrRpcInternal
+	}
+
+	err = s.contract.WaitMinedAndCheck(tx)
+	if err != nil {
+		logger.
+			WithError(err).
+			WithField("call", "ValidateProof").
+			WithField("tx", tx.Hash().String()).
+			Error("failed to wait mined")
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return &v1.ScrapProofResponse{
+		TxId: tx.Hash().Bytes(),
 	}, nil
 }

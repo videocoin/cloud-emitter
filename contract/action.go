@@ -2,6 +2,7 @@ package contract
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -194,6 +195,50 @@ func (c *Client) Deposit(ctx context.Context, userID string, to, value *big.Int)
 	tx, err := s.Deposit(opts)
 	if err != nil {
 		return tx, err
+	}
+
+	return tx, nil
+}
+
+func (c *Client) ValidateProof(ctx context.Context, streamContractAddress string, profileID, chunkID *big.Int) (*types.Transaction, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "ValidateProof")
+	defer span.Finish()
+
+	stream, err := stream.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new stream: %s", err.Error())
+	}
+
+	transactOpts, err := getTransactOpts(context.Background(), c.ethClient, c.validatorKey, c.validatorSecret)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get transact opts: %s", err.Error())
+	}
+
+	tx, err := stream.ValidateProof(transactOpts, profileID, chunkID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to validate proof: %s", err.Error())
+	}
+
+	return tx, nil
+}
+
+func (c *Client) ScrapProof(ctx context.Context, streamContractAddress string, profileID, chunkID *big.Int) (*types.Transaction, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "ScrapProof")
+	defer span.Finish()
+
+	stream, err := stream.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new stream: %s", err.Error())
+	}
+
+	transactOpts, err := getTransactOpts(context.Background(), c.ethClient, c.validatorKey, c.validatorSecret)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get transact opts: %s", err.Error())
+	}
+
+	tx, err := stream.ScrapProof(transactOpts, profileID, chunkID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scrap proof: %s", err.Error())
 	}
 
 	return tx, nil

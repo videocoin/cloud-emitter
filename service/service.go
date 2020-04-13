@@ -41,6 +41,8 @@ func NewService(cfg *Config) (*Service, error) {
 		ClientSecret:    cfg.ClientSecret,
 		ManagerKey:      cfg.ManagerKey,
 		ManagerSecret:   cfg.ManagerSecret,
+		ValidatorKey:    cfg.ValidatorKey,
+		ValidatorSecret: cfg.ValidatorSecret,
 		Logger:          cfg.Logger.WithField("system", "contract"),
 	}
 

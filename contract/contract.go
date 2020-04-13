@@ -26,18 +26,22 @@ type ClientOpts struct {
 	ClientSecret    string
 	ManagerKey      string
 	ManagerSecret   string
+	ValidatorKey    string
+	ValidatorSecret string
 }
 
 type Client struct {
-	accounts      accountsv1.AccountServiceClient
+	logger *logrus.Entry
+
+	clientSecret    string
+	managerKey      string
+	managerSecret   string
+	validatorKey    string
+	validatorSecret string
+
 	ethClient     *ethclient.Client
 	streamManager *sm.Manager
-
-	clientSecret  string
-	managerKey    string
-	managerSecret string
-
-	logger *logrus.Entry
+	accounts      accountsv1.AccountServiceClient
 }
 
 func NewContractClient(opts *ClientOpts) (*Client, error) {
@@ -53,13 +57,15 @@ func NewContractClient(opts *ClientOpts) (*Client, error) {
 	}
 
 	return &Client{
-		accounts:      opts.Accounts,
-		ethClient:     ethClient,
-		streamManager: manager,
-		clientSecret:  opts.ClientSecret,
-		managerKey:    opts.ManagerKey,
-		managerSecret: opts.ManagerSecret,
-		logger:        opts.Logger,
+		logger:          opts.Logger,
+		accounts:        opts.Accounts,
+		clientSecret:    opts.ClientSecret,
+		managerKey:      opts.ManagerKey,
+		managerSecret:   opts.ManagerSecret,
+		validatorKey:    opts.ValidatorKey,
+		validatorSecret: opts.ValidatorSecret,
+		ethClient:       ethClient,
+		streamManager:   manager,
 	}, nil
 }
 
@@ -106,6 +112,23 @@ func (c *Client) getManagerTransactOpts(ctx context.Context) (*bind.TransactOpts
 	transactOpts, err := bcops.GetBCAuth(c.ethClient, decrypted)
 	if err != nil {
 		c.logger.WithError(err).Error("failed to get bc auth")
+		return nil, err
+	}
+
+	return transactOpts, nil
+}
+
+func getTransactOpts(ctx context.Context, client *ethclient.Client, key, secret string) (*bind.TransactOpts, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "getTransactOpts")
+	defer span.Finish()
+
+	decrypted, err := keystore.DecryptKey([]byte(key), secret)
+	if err != nil {
+		return nil, err
+	}
+
+	transactOpts, err := bcops.GetBCAuth(client, decrypted)
+	if err != nil {
 		return nil, err
 	}
 
