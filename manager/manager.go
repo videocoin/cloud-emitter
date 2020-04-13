@@ -47,9 +47,8 @@ func (m *Manager) StartBackgroundTasks() {
 	go m.checkBalanceTask()
 }
 
-func (m *Manager) StopBackgroundTasks() error {
+func (m *Manager) StopBackgroundTasks() {
 	m.bTicker.Stop()
-	return nil
 }
 
 func (m *Manager) checkBalanceTask() {
