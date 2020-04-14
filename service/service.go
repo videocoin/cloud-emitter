@@ -4,6 +4,7 @@ import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-emitter/contract"
+	"github.com/videocoin/cloud-emitter/eventbus"
 	"github.com/videocoin/cloud-emitter/manager"
 	"github.com/videocoin/cloud-emitter/rpc"
 	faucetcli "github.com/videocoin/cloud-pkg/faucet"
@@ -15,6 +16,7 @@ type Service struct {
 	cfg     *Config
 	rpc     *rpc.Server
 	manager *manager.Manager
+	eb      *eventbus.EventBus
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -75,10 +77,22 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
+	ebConfig := &eventbus.Config{
+		URI:    cfg.MQURI,
+		Name:   cfg.Name,
+		Logger: cfg.Logger.WithField("system", "eventbus"),
+		Faucet: faucet,
+	}
+	eb, err := eventbus.New(ebConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	svc := &Service{
 		cfg:     cfg,
 		rpc:     rpc,
 		manager: manager,
+		eb:      eb,
 	}
 
 	return svc, nil
@@ -86,7 +100,13 @@ func NewService(cfg *Config) (*Service, error) {
 
 func (s *Service) Start(errCh chan error) {
 	go func() {
+		s.cfg.Logger.Info("starting rpc server")
 		errCh <- s.rpc.Start()
+	}()
+
+	go func() {
+		s.cfg.Logger.Info("starting eventbus")
+		errCh <- s.eb.Start()
 	}()
 
 	s.manager.StartBackgroundTasks()
@@ -94,5 +114,5 @@ func (s *Service) Start(errCh chan error) {
 
 func (s *Service) Stop() error {
 	s.manager.StopBackgroundTasks()
-	return nil
+	return s.eb.Stop()
 }

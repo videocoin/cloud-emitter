@@ -90,6 +90,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: clientSecret
+            - name: MQURI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: mqUri
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:

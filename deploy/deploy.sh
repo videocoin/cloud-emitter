@@ -61,6 +61,7 @@ function get_vars() {
     readonly CLIENT_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/clientSecret`
     readonly VALIDATOR_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/validatorKey`
     readonly VALIDATOR_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/validatorSecret`
+    readonly MQ_URI=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/mqUri`
     readonly SENTRY_DSN=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/sentryDsn`
 }
 
@@ -76,6 +77,7 @@ function deploy() {
         --set config.streamManagerContractAddr="${STREAM_MANAGER_CONTRACT_ADDR}" \
         --set config.faucetUrl="${FAUCET_URL}" \
         --set secrets.rpcNodeHttpAddr="${RPC_NODE_HTTP_ADDR}" \
+        --set secrets.mqUri="${MQ_URI}" \
         --set secrets.managerKey="${MANAGER_KEY}" \
         --set secrets.managerSecret="${MANAGER_SECRET}" \
         --set secrets.clientSecret="${CLIENT_SECRET}" \
