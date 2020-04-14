@@ -159,7 +159,10 @@ func (e *EventBus) handleMinerEvent(d amqp.Delivery) error {
 		{
 			err = e.faucet.Do(req.Address, 10)
 			if err != nil {
-				e.logger.WithField("address", req.Address).Errorf("failed to faucet miner")
+				e.logger.
+					WithField("address", req.Address).
+					WithError(err).
+					Errorf("failed to faucet miner")
 				return nil
 			}
 		}
