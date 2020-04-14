@@ -132,7 +132,7 @@ func (s *Server) ValidateProof(ctx context.Context, req *v1.ValidateProofRequest
 	}
 
 	return &v1.ValidateProofResponse{
-		TxId: tx.Hash().Bytes(),
+		TxId: []byte(tx.Hash().String()),
 	}, nil
 }
 
@@ -173,6 +173,6 @@ func (s *Server) ScrapProof(ctx context.Context, req *v1.ScrapProofRequest) (*v1
 	}
 
 	return &v1.ScrapProofResponse{
-		TxId: tx.Hash().Bytes(),
+		TxId: []byte(tx.Hash().String()),
 	}, nil
 }
