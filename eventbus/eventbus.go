@@ -1,6 +1,7 @@
 package eventbus
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/opentracing/opentracing-go"
@@ -8,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
+	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	faucetcli "github.com/videocoin/cloud-pkg/faucet"
 	"github.com/videocoin/cloud-pkg/mqmux"
 	tracerext "github.com/videocoin/cloud-pkg/tracer"
@@ -43,6 +45,11 @@ func New(c *Config) (*EventBus, error) {
 
 func (e *EventBus) Start() error {
 	err := e.mq.Consumer("accounts.events", 1, false, e.handleAccountEvent)
+	if err != nil {
+		return err
+	}
+
+	err = e.mq.Publisher("emitter.events")
 	if err != nil {
 		return err
 	}
@@ -90,7 +97,12 @@ func (e *EventBus) handleAccountEvent(d amqp.Delivery) error {
 	switch req.Type {
 	case accountsv1.EventTypeAccountCreated:
 		{
-			err := e.faucet.Do(req.Address, 10)
+			err := e.EmitAccountCreated(context.Background(), req.UserID, req.Address)
+			if err != nil {
+				e.logger.WithField("address", req.Address).Errorf("failed to emit account created")
+			}
+
+			err = e.faucet.Do(req.Address, 10)
 			if err != nil {
 				e.logger.WithField("address", req.Address).Errorf("failed to faucet")
 				return nil
@@ -98,6 +110,36 @@ func (e *EventBus) handleAccountEvent(d amqp.Delivery) error {
 		}
 	case accountsv1.EventTypeUnknown:
 		e.logger.Error("event type is unknown")
+	}
+
+	return nil
+}
+
+func (e *EventBus) EmitAccountCreated(ctx context.Context, userID, address string) error {
+	headers := make(amqp.Table)
+
+	span := opentracing.SpanFromContext(ctx)
+	if span != nil {
+		ext.SpanKindRPCServer.Set(span)
+		ext.Component.Set(span, "emitter")
+		err := span.Tracer().Inject(
+			span.Context(),
+			opentracing.TextMap,
+			mqmux.RMQHeaderCarrier(headers),
+		)
+		if err != nil {
+			e.logger.Errorf("failed to span inject: %s", err)
+		}
+	}
+	event := &v1.Event{
+		Type:    v1.EventTypeAccountCreated,
+		UserID:  userID,
+		Address: address,
+	}
+
+	err := e.mq.PublishX("emitter.events", event, headers)
+	if err != nil {
+		return err
 	}
 
 	return nil
