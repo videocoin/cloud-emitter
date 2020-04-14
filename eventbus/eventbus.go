@@ -10,6 +10,7 @@ import (
 	"github.com/streadway/amqp"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
+	minersv1 "github.com/videocoin/cloud-api/miners/v1"
 	faucetcli "github.com/videocoin/cloud-pkg/faucet"
 	"github.com/videocoin/cloud-pkg/mqmux"
 	tracerext "github.com/videocoin/cloud-pkg/tracer"
@@ -45,6 +46,11 @@ func New(c *Config) (*EventBus, error) {
 
 func (e *EventBus) Start() error {
 	err := e.mq.Consumer("accounts.events", 1, false, e.handleAccountEvent)
+	if err != nil {
+		return err
+	}
+
+	err = e.mq.Consumer("miners.events", 1, false, e.handleMinerEvent)
 	if err != nil {
 		return err
 	}
@@ -110,6 +116,53 @@ func (e *EventBus) handleAccountEvent(d amqp.Delivery) error {
 		}
 	case accountsv1.EventTypeUnknown:
 		e.logger.Error("event type is unknown")
+	}
+
+	return nil
+}
+
+func (e *EventBus) handleMinerEvent(d amqp.Delivery) error {
+	var span opentracing.Span
+	tracer := opentracing.GlobalTracer()
+	spanCtx, err := tracer.Extract(opentracing.TextMap, mqmux.RMQHeaderCarrier(d.Headers))
+
+	e.logger.Debugf("handling body: %+v", string(d.Body))
+
+	if err != nil {
+		span = tracer.StartSpan("eventbus.handleMinerEvent")
+	} else {
+		span = tracer.StartSpan("eventbus.handleMinerEvent", ext.RPCServerOption(spanCtx))
+	}
+
+	defer span.Finish()
+
+	req := new(minersv1.Event)
+	err = json.Unmarshal(d.Body, req)
+	if err != nil {
+		tracerext.SpanLogError(span, err)
+		return err
+	}
+
+	span.SetTag("event_type", req.Type.String())
+	span.SetTag("user_id", req.UserID)
+	span.SetTag("address", req.Address)
+
+	logger := e.logger.WithFields(logrus.Fields{
+		"event_type": req.Type.String(),
+		"user_id":    req.UserID,
+		"address":    req.Address,
+	})
+	logger.Debugf("handling request %+v", req)
+
+	switch req.Type {
+	case minersv1.EventTypeAssignMinerAddress:
+		{
+			err = e.faucet.Do(req.Address, 10)
+			if err != nil {
+				e.logger.WithField("address", req.Address).Errorf("failed to faucet miner")
+				return nil
+			}
+		}
 	}
 
 	return nil
