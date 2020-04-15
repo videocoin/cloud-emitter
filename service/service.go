@@ -1,6 +1,10 @@
 package service
 
 import (
+	"fmt"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-emitter/contract"
@@ -9,7 +13,7 @@ import (
 	"github.com/videocoin/cloud-emitter/rpc"
 	faucetcli "github.com/videocoin/cloud-pkg/faucet"
 	"github.com/videocoin/cloud-pkg/grpcutil"
-	"google.golang.org/grpc"
+	"github.com/videocoin/go-staking"
 )
 
 type Service struct {
@@ -20,24 +24,25 @@ type Service struct {
 }
 
 func NewService(cfg *Config) (*Service, error) {
-	alogger := cfg.Logger.WithField("system", "accountcli")
-	aGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(alogger)
-	accountsConn, err := grpc.Dial(cfg.AccountsRPCAddr, aGrpcDialOpts...)
+	conn, err := grpcutil.Connect(cfg.AccountsRPCAddr, cfg.Logger.WithField("system", "accountcli"))
 	if err != nil {
 		return nil, err
 	}
-	accounts := accountsv1.NewAccountServiceClient(accountsConn)
+	accounts := accountsv1.NewAccountServiceClient(conn)
 
-	slogger := cfg.Logger.WithField("system", "streamscli")
-	sGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(slogger)
-	streamsConn, err := grpc.Dial(cfg.StreamsRPCAddr, sGrpcDialOpts...)
+	conn, err = grpcutil.Connect(cfg.StreamsRPCAddr, cfg.Logger.WithField("system", "streamscli"))
 	if err != nil {
 		return nil, err
 	}
-	streams := streamsv1.NewStreamServiceClient(streamsConn)
+	streams := streamsv1.NewStreamServiceClient(conn)
+
+	ethClient, err := ethclient.Dial(cfg.RPCNodeHTTPAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
+	}
 
 	contractOpts := &contract.ClientOpts{
-		RPCNodeHTTPAddr: cfg.RPCNodeHTTPAddr,
+		EthClient:       ethClient,
 		ContractAddr:    cfg.StreamManagerContractAddr,
 		Accounts:        accounts,
 		ClientSecret:    cfg.ClientSecret,
@@ -53,10 +58,16 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
+	stakingClient, err := staking.NewClient(ethClient, common.HexToAddress(cfg.StakingManagerContractAddr))
+	if err != nil {
+		return nil, err
+	}
+
 	rpcConfig := &rpc.ServerOpts{
 		Addr:     cfg.RPCAddr,
 		Streams:  streams,
 		Contract: contract,
+		Staking:  stakingClient,
 		Logger:   cfg.Logger.WithField("system", "rpc"),
 	}
 

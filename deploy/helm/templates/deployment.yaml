@@ -55,6 +55,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: streamManagerContractAddr
+            - name: STAKING_MANAGER_CONTRACT_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: stakingManagerContractAddr
             - name: FAUCET_URL
               valueFrom:
                 configMapKeyRef:

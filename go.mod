@@ -7,7 +7,7 @@ require (
 	github.com/aristanetworks/goarista v0.0.0-20190712234253-ed1100a1c015 // indirect
 	github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
-	github.com/ethereum/go-ethereum v1.8.27
+	github.com/ethereum/go-ethereum v1.9.12
 	github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff // indirect
 	github.com/gogo/protobuf v1.3.1
 	github.com/gorilla/websocket v1.4.1 // indirect
@@ -15,7 +15,6 @@ require (
 	github.com/karalabe/usb v0.0.0-20190919080040-51dc0efba356 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-runewidth v0.0.4 // indirect
-	github.com/olekukonko/tablewriter v0.0.1 // indirect
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/rs/cors v1.7.0 // indirect
@@ -28,6 +27,7 @@ require (
 	github.com/uber-go/atomic v1.4.0 // indirect
 	github.com/videocoin/cloud-api v0.2.15
 	github.com/videocoin/cloud-pkg v0.0.6
+	github.com/videocoin/go-staking v0.0.0-20200410180201-6944f4d9a28b
 	github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208 // indirect
 	google.golang.org/grpc v1.21.1
 )

@@ -21,6 +21,8 @@ service EmitterService {
     rpc Deposit(DepositRequest) returns (DepositResponse) {}
     rpc ValidateProof(ValidateProofRequest) returns (ValidateProofResponse) {}
     rpc ScrapProof(ScrapProofRequest) returns (ScrapProofResponse) {}
+
+    rpc ListWorkers(google.protobuf.Empty) returns (ListWorkersResponse) {}
 }
 
 message Tx {
@@ -85,4 +87,17 @@ message ScrapProofRequest {
 
 message ScrapProofResponse {
     bytes tx_id = 1;
+}
+
+message WorkerResponse {
+    string address = 1;
+    uint32 state = 2;
+    bytes totalStake = 3;
+    bytes selfStake = 4;
+    bytes delegatedStake = 5;
+	uint64 registeredAt = 6;
+}
+
+message ListWorkersResponse {
+    repeated WorkerResponse items = 1;
 }
