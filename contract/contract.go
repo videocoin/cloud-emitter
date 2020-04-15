@@ -19,7 +19,7 @@ import (
 )
 
 type ClientOpts struct {
-	RPCNodeHTTPAddr string
+	EthClient       *ethclient.Client
 	ContractAddr    string
 	Logger          *logrus.Entry
 	Accounts        accountsv1.AccountServiceClient
@@ -45,18 +45,14 @@ type Client struct {
 }
 
 func NewContractClient(opts *ClientOpts) (*Client, error) {
-	ethClient, err := ethclient.Dial(opts.RPCNodeHTTPAddr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
-	}
-
 	address := common.HexToAddress(opts.ContractAddr)
-	manager, err := sm.NewManager(address, ethClient)
+	manager, err := sm.NewManager(address, opts.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create smart contract stream manager: %s", err.Error())
 	}
 
 	return &Client{
+		ethClient:       opts.EthClient,
 		logger:          opts.Logger,
 		accounts:        opts.Accounts,
 		clientSecret:    opts.ClientSecret,
@@ -64,7 +60,6 @@ func NewContractClient(opts *ClientOpts) (*Client, error) {
 		managerSecret:   opts.ManagerSecret,
 		validatorKey:    opts.ValidatorKey,
 		validatorSecret: opts.ValidatorSecret,
-		ethClient:       ethClient,
 		streamManager:   manager,
 	}, nil
 }

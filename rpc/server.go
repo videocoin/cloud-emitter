@@ -3,6 +3,8 @@ package rpc
 import (
 	"net"
 
+	"github.com/videocoin/go-staking"
+
 	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
@@ -19,6 +21,7 @@ type ServerOpts struct {
 	Addr     string
 	Streams  streamsv1.StreamServiceClient
 	Contract *contract.Client
+	Staking  *staking.Client
 }
 
 type Server struct {
@@ -28,6 +31,7 @@ type Server struct {
 	listen   net.Listener
 	streams  streamsv1.StreamServiceClient
 	contract *contract.Client
+	staking  *staking.Client
 }
 
 func NewRPCServer(opts *ServerOpts) (*Server, error) {
@@ -49,6 +53,7 @@ func NewRPCServer(opts *ServerOpts) (*Server, error) {
 		listen:   listen,
 		streams:  opts.Streams,
 		contract: opts.Contract,
+		staking:  opts.Staking,
 	}
 
 	v1.RegisterEmitterServiceServer(grpcServer, rpcServer)

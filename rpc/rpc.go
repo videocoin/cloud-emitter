@@ -176,3 +176,31 @@ func (s *Server) ScrapProof(ctx context.Context, req *v1.ScrapProofRequest) (*v1
 		TxId: []byte(tx.Hash().String()),
 	}, nil
 }
+
+func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.ListWorkersResponse, error) {
+	_ = opentracing.SpanFromContext(ctx)
+
+	s.logger.Info("list workers")
+
+	workers, err := s.staking.GetAllTranscoders(context.Background())
+	if err != nil {
+		return nil, rpc.ErrRpcInternal
+	}
+
+	resp := &v1.ListWorkersResponse{
+		Items: []*v1.WorkerResponse{},
+	}
+
+	for _, worker := range workers {
+		resp.Items = append(resp.Items, &v1.WorkerResponse{
+			Address:        worker.Address.Hex(),
+			State:          uint32(worker.State),
+			TotalStake:     worker.TotalStake.Bytes(),
+			SelfStake:      worker.SelfStake.Bytes(),
+			DelegatedStake: worker.DelegatedStake.Bytes(),
+			RegisteredAt:   worker.Timestamp,
+		})
+	}
+
+	return resp, nil
+}
