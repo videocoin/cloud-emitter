@@ -21,7 +21,6 @@ func (c *Client) RequestStream(ctx context.Context, userID string, streamID *big
 
 	transactOpts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
-		c.logger.WithError(err).Error("failed to get client transact opts")
 		return nil, err
 	}
 
@@ -78,7 +77,6 @@ func (c *Client) CreateStream(ctx context.Context, userID string, streamID *big.
 
 	transactOpts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
-		c.logger.Error(err)
 		return nil, err
 	}
 
@@ -91,7 +89,6 @@ func (c *Client) CreateStream(ctx context.Context, userID string, streamID *big.
 		streamID,
 	)
 	if err != nil {
-		c.logger.Error(err)
 		return nil, err
 	}
 
