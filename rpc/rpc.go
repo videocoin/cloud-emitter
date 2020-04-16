@@ -193,9 +193,9 @@ func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.Li
 		resp.Items = append(resp.Items, &v1.WorkerResponse{
 			Address:        worker.Address.Hex(),
 			State:          v1.WorkerState(worker.State),
-			TotalStake:     worker.TotalStake.Bytes(),
-			SelfStake:      worker.SelfStake.Bytes(),
-			DelegatedStake: worker.DelegatedStake.Bytes(),
+			TotalStake:     worker.TotalStake.String(),
+			SelfStake:      worker.SelfStake.String(),
+			DelegatedStake: worker.DelegatedStake.String(),
 			RegisteredAt:   pointer.ToTime(time.Unix(int64(worker.Timestamp), 0)),
 		})
 	}
