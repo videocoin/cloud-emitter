@@ -80,8 +80,7 @@ func (c *Client) CreateStream(ctx context.Context, userID string, streamID *big.
 		return nil, err
 	}
 
-	// todo: constant value ???
-	i, e := big.NewInt(10), big.NewInt(19)
+	i, e := big.NewInt(5), big.NewInt(19)
 	transactOpts.Value = i.Exp(i, e, nil)
 
 	tx, err := c.streamManager.CreateStream(
