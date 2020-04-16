@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/opentracing/opentracing-go"
+	"github.com/videocoin/cloud-pkg/ethutils"
 	"github.com/videocoin/cloud-pkg/stream"
 )
 
@@ -80,8 +81,7 @@ func (c *Client) CreateStream(ctx context.Context, userID string, streamID *big.
 		return nil, err
 	}
 
-	i, e := big.NewInt(5), big.NewInt(19)
-	transactOpts.Value = i.Exp(i, e, nil)
+	transactOpts.Value = ethutils.EthToWei(5)
 
 	tx, err := c.streamManager.CreateStream(
 		transactOpts,
