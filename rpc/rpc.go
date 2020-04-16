@@ -3,7 +3,9 @@ package rpc
 import (
 	"context"
 	"math/big"
+	"time"
 
+	"github.com/AlekSi/pointer"
 	"github.com/ethereum/go-ethereum/common"
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
@@ -178,13 +180,9 @@ func (s *Server) ScrapProof(ctx context.Context, req *v1.ScrapProofRequest) (*v1
 }
 
 func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.ListWorkersResponse, error) {
-	_ = opentracing.SpanFromContext(ctx)
-
-	s.logger.Info("list workers")
-
-	workers, err := s.staking.GetAllTranscoders(context.Background())
+	workers, err := s.staking.GetAllTranscoders(ctx)
 	if err != nil {
-		return nil, rpc.ErrRpcInternal
+		return nil, rpc.NewRpcInternalError(err)
 	}
 
 	resp := &v1.ListWorkersResponse{
@@ -194,11 +192,11 @@ func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.Li
 	for _, worker := range workers {
 		resp.Items = append(resp.Items, &v1.WorkerResponse{
 			Address:        worker.Address.Hex(),
-			State:          uint32(worker.State),
+			State:          v1.WorkerState(worker.State),
 			TotalStake:     worker.TotalStake.Bytes(),
 			SelfStake:      worker.SelfStake.Bytes(),
 			DelegatedStake: worker.DelegatedStake.Bytes(),
-			RegisteredAt:   worker.Timestamp,
+			RegisteredAt:   pointer.ToTime(time.Unix(int64(worker.Timestamp), 0)),
 		})
 	}
 
