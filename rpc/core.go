@@ -2,15 +2,15 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
-	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 )
 
-func (s *Server) initStream(ctx context.Context, req *v1.InitStreamRequest) {
+func (s *Server) initStream(ctx context.Context, req *v1.InitStreamRequest) (*v1.InitStreamResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "core.initStream")
 	defer span.Finish()
 
@@ -21,113 +21,96 @@ func (s *Server) initStream(ctx context.Context, req *v1.InitStreamRequest) {
 	})
 
 	streamID := new(big.Int).SetUint64(req.StreamContractId)
-	streamStatus := streamsv1.StreamStatusFailed
 
-	defer func() {
-		_, err := s.streams.UpdateStatus(ctx, &streamsv1.UpdateStreamRequest{
-			Id:     req.StreamId,
-			Status: streamStatus,
-		})
-
-		if err != nil {
-			logger.
-				WithError(err).
-				WithField("new_status", streamStatus).
-				Errorf("failed to update stream status on defer")
-			return
-		}
-	}()
+	resp := &v1.InitStreamResponse{}
 
 	logger.Info("request stream")
 
 	tx, err := s.contract.RequestStream(context.Background(), req.UserId, streamID, req.ProfilesIds)
 	if err != nil {
-		logger.WithError(err).Error("failed to request stream")
-		return
+		return resp, fmt.Errorf("failed to RequestStream: %s", err)
 	}
 
-	logger.WithField("tx", tx.Hash().String()).Info("request stream tx")
+	resp.RequestStreamTx = tx.Hash().String()
+
+	logger.WithField("tx", resp.RequestStreamTx).Info("request stream tx")
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("call", "RequestStream").
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-		return
+		resp.RequestStreamTxStatus = v1.ReceiptStatusFailed
+		return resp, fmt.Errorf("failed to wait RequestStream: %s", err)
 	}
+
+	resp.RequestStreamTxStatus = v1.ReceiptStatusSuccess
 
 	logger.Info("approve stream")
 
 	tx, err = s.contract.ApproveStream(ctx, streamID)
 	if err != nil {
-		logger.WithError(err).Error("failed to approve stream")
-		return
+		return resp, fmt.Errorf("failed to ApproveStream: %s", err)
 	}
 
-	logger.WithField("tx", tx.Hash().String()).Info("approve stream tx")
+	resp.ApproveStreamTx = tx.Hash().String()
+
+	logger.WithField("tx", resp.ApproveStreamTx).Info("approve stream tx")
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.WithError(err).
-			WithField("call", "ApproveStream").
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-		return
+		resp.ApproveStreamTxStatus = v1.ReceiptStatusFailed
+		return resp, fmt.Errorf("failed to wait ApproveStream: %s", err)
 	}
+
+	resp.ApproveStreamTxStatus = v1.ReceiptStatusSuccess
 
 	logger.Info("create stream")
 
 	tx, err = s.contract.CreateStream(ctx, req.UserId, streamID)
 	if err != nil {
-		logger.WithError(err).Error("failed to create stream")
-		return
+		return resp, fmt.Errorf("failed to CreateStream: %s", err)
 	}
 
-	logger.WithField("tx", tx.Hash().String()).Info("create stream tx")
+	resp.CreateStreamTx = tx.Hash().String()
+
+	logger.WithField("tx", resp.CreateStreamTx).Info("create stream tx")
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("call", "CreateStream").
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-		return
+		resp.CreateStreamTxStatus = v1.ReceiptStatusFailed
+		return resp, fmt.Errorf("failed to wait CreateStreamTxStatus: %s", err)
 	}
 
 	logger.Info("getting stream address")
 
 	streamAddress, err := s.contract.GetStreamAddress(ctx, streamID)
 	if err != nil {
-		logger.WithError(err).Error("failed to get stream address")
-		return
+		return resp, fmt.Errorf("failed to GetStreamAddress: %s", err)
 	}
 
-	_, err = s.streams.UpdateStatus(ctx, &streamsv1.UpdateStreamRequest{
-		Id:                    req.StreamId,
-		StreamContractAddress: streamAddress,
-		StreamContractId:      streamID.Uint64(),
-	})
-	if err != nil {
-		logger.WithError(err).Error("failed to update stream")
-		return
-	}
-
-	// will be updated on defer
-	streamStatus = streamsv1.StreamStatusPrepared
+	resp.StreamContractAddress = streamAddress
 
 	logger.Info("allow refund")
 
-	_, err = s.contract.AllowRefund(ctx, streamID)
+	tx, err = s.contract.AllowRefund(ctx, streamID)
 	if err != nil {
-		logger.WithError(err).Error("failed to allow refund")
-		return
+		return resp, fmt.Errorf("failed to AllowRefund: %s", err)
 	}
+
+	resp.AllowRefundTx = tx.Hash().String()
+
+	logger.WithField("tx", resp.AllowRefundTx).Info("allow refund tx")
+
+	err = s.contract.WaitMinedAndCheck(tx)
+	if err != nil {
+		resp.AllowRefundTxStatus = v1.ReceiptStatusFailed
+		return resp, fmt.Errorf("failed to wait AllowRefundTxStatus: %s", err)
+	}
+
+	resp.AllowRefundTxStatus = v1.ReceiptStatusSuccess
+
+	return resp, nil
 }
 
-func (s *Server) endStream(ctx context.Context, req *v1.EndStreamRequest) {
+func (s *Server) endStream(ctx context.Context, req *v1.EndStreamRequest) (*v1.EndStreamResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "core.endStream")
 	defer span.Finish()
 
@@ -140,35 +123,46 @@ func (s *Server) endStream(ctx context.Context, req *v1.EndStreamRequest) {
 
 	streamID := new(big.Int).SetUint64(req.StreamContractId)
 
+	resp := &v1.EndStreamResponse{}
+
 	logger.Info("end stream")
 
 	tx, err := s.contract.EndStream(ctx, req.UserId, streamID)
 	if err != nil {
-		logger.WithError(err).Error("failed to end stream")
-		return
+		return resp, fmt.Errorf("failed to end stream: %s", err)
 	}
 
-	logger.WithField("tx", tx.Hash().String()).Info("end stream tx")
+	resp.EndStreamTx = tx.Hash().String()
+
+	logger.WithField("tx", resp.EndStreamTx).Info("end stream tx")
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("call", "EndStream").
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-		return
+		resp.EndStreamTxStatus = v1.ReceiptStatusFailed
+		return resp, fmt.Errorf("failed to wait EndStream: %s", err)
 	}
+
+	resp.EndStreamTxStatus = v1.ReceiptStatusSuccess
 
 	logger.Info("escrow refund")
 
-	_, err = s.contract.EscrowRefund(ctx, req.StreamContractAddress)
+	tx, err = s.contract.EscrowRefund(ctx, req.StreamContractAddress)
 	if err != nil {
-		logger.WithError(err).Error("failed to escrow refund")
+		return resp, fmt.Errorf("failed to escrow refund: %s", err)
 	}
+
+	err = s.contract.WaitMinedAndCheck(tx)
+	if err != nil {
+		resp.EscrowRefundTxStatus = v1.ReceiptStatusFailed
+		return resp, fmt.Errorf("failed to wait EscrowRefundTxStatus: %s", err)
+	}
+
+	resp.EscrowRefundTxStatus = v1.ReceiptStatusSuccess
+
+	return resp, nil
 }
 
-func (s *Server) addInputChunk(ctx context.Context, req *v1.AddInputChunkRequest) {
+func (s *Server) addInputChunk(ctx context.Context, req *v1.AddInputChunkRequest) (*v1.AddInputChunkResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "core.addInputChunk")
 	defer span.Finish()
 
@@ -184,62 +178,64 @@ func (s *Server) addInputChunk(ctx context.Context, req *v1.AddInputChunkRequest
 	reward, _ := new(big.Float).Mul(big.NewFloat(req.Reward), big.NewFloat(1000000000000000000)).Int64()
 	rewards := []*big.Int{big.NewInt(reward)}
 
+	resp := &v1.AddInputChunkResponse{}
+
 	logger.Info("add input chunk")
 
 	tx, err := s.contract.AddInputChunkID(ctx, streamID, chunkID, rewards)
 	if err != nil {
-		logger.WithError(err).Error("failed to add input chunk")
-		return
+		if tx != nil {
+			resp.Tx = tx.Hash().String()
+			logger = logger.WithField("tx", tx.Hash().String())
+		}
+		logger.Errorf("failed to contract.AddInputChunkID: %s", err)
+		return resp, fmt.Errorf("failed to add input chunk: %s", err)
 	}
 
-	logger.WithField("tx", tx.Hash().String()).Info("add input chunk tx")
+	resp.Tx = tx.Hash().String()
+
+	logger = logger.WithField("tx", resp.Tx)
+	logger.Info("add input chunk tx")
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("call", "addInputChunkId").
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-		return
+		resp.Status = v1.ReceiptStatusFailed
+		logger.Errorf("failed to wait contract.AddInputChunkID: %s", err)
+		return resp, fmt.Errorf("failed to wait AddInputChunkID")
 	}
+
+	resp.Status = v1.ReceiptStatusSuccess
+
+	return resp, nil
 }
 
-func (s *Server) deposit(ctx context.Context, userID, streamID string, to *big.Int) {
+func (s *Server) deposit(ctx context.Context, userID, streamID string, to *big.Int) (*v1.DepositResponse, error) {
 	logger := s.logger.WithFields(logrus.Fields{
 		"user_id":   userID,
 		"stream_id": streamID,
 		"to":        to.String(),
 	})
 
+	resp := &v1.DepositResponse{}
+
 	logger.Info("deposit")
 
 	tx, err := s.contract.Deposit(ctx, userID, to, big.NewInt(1000000000000000000))
 	if err != nil {
-		logger.WithError(err).Error("failed to deposit")
-
-		err = s.markStreamAsFailed(streamID)
-		if err != nil {
-			logger.WithError(err).Error("failed to mark stream as failed")
-		}
-
-		return
+		return resp, fmt.Errorf("failed to Deposit: %s", err)
 	}
 
-	logger.WithField("tx", tx.Hash().String()).Info("deposit tx")
+	resp.Tx = tx.Hash().String()
+
+	logger.WithField("tx", resp.Tx).Info("deposit tx")
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-
-		err = s.markStreamAsFailed(streamID)
-		if err != nil {
-			logger.WithError(err).Error("failed to mark stream as failed")
-		}
-
-		return
+		resp.Status = v1.ReceiptStatusFailed
+		return resp, fmt.Errorf("failed to wait Deposit: %s", err)
 	}
+
+	resp.Status = v1.ReceiptStatusSuccess
+
+	return resp, nil
 }

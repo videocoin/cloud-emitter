@@ -7,7 +7,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
-	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-emitter/contract"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"google.golang.org/grpc"
@@ -19,7 +18,6 @@ import (
 type ServerOpts struct {
 	Logger   *logrus.Entry
 	Addr     string
-	Streams  streamsv1.StreamServiceClient
 	Contract *contract.Client
 	Staking  *staking.Client
 }
@@ -29,7 +27,6 @@ type Server struct {
 	addr     string
 	grpc     *grpc.Server
 	listen   net.Listener
-	streams  streamsv1.StreamServiceClient
 	contract *contract.Client
 	staking  *staking.Client
 }
@@ -51,7 +48,6 @@ func NewRPCServer(opts *ServerOpts) (*Server, error) {
 		addr:     opts.Addr,
 		grpc:     grpcServer,
 		listen:   listen,
-		streams:  opts.Streams,
 		contract: opts.Contract,
 		staking:  opts.Staking,
 	}
@@ -63,6 +59,9 @@ func NewRPCServer(opts *ServerOpts) (*Server, error) {
 }
 
 func (s *Server) Start() error {
-	s.logger.Infof("starting rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
+}
+
+func (s *Server) Stop() {
+	s.grpc.GracefulStop()
 }

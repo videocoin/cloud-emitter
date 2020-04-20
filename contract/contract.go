@@ -130,11 +130,20 @@ func getTransactOpts(ctx context.Context, client *ethclient.Client, key, secret 
 	return transactOpts, nil
 }
 
-func (c *Client) WaitMinedAndCheck(tx *types.Transaction) error {
+func (c *Client) WaitMined(tx *types.Transaction) (*types.Receipt, error) {
 	cancelCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	receipt, err := bind.WaitMined(cancelCtx, c.ethClient, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	return receipt, nil
+}
+
+func (c *Client) WaitMinedAndCheck(tx *types.Transaction) error {
+	receipt, err := c.WaitMined(tx)
 	if err != nil {
 		return err
 	}

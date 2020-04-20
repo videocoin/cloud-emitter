@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -16,30 +17,36 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*protoempty.Empty, error) {
+func (s *Server) InitStream(ctx context.Context, req *v1.InitStreamRequest) (*v1.InitStreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", req.StreamId)
 	span.SetTag("stream_contract_id", req.StreamContractId)
 
-	s.initStreamAsync(opentracing.ContextWithSpan(context.Background(), span), req)
+	resp, err := s.initStream(ctx, req)
+	if err != nil {
+		return resp, rpc.NewRpcInternalError(err)
+	}
 
-	return &protoempty.Empty{}, nil
+	return resp, nil
 }
 
-func (s *Server) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*protoempty.Empty, error) {
+func (s *Server) EndStream(ctx context.Context, req *v1.EndStreamRequest) (*v1.EndStreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("stream_id", req.StreamId)
 	span.SetTag("stream_contract_id", req.StreamContractId)
 	span.SetTag("stream_contract_address", req.StreamContractAddress)
 
-	s.endStreamAsync(opentracing.ContextWithSpan(context.Background(), span), req)
+	resp, err := s.endStream(ctx, req)
+	if err != nil {
+		return resp, rpc.NewRpcInternalError(err)
+	}
 
-	return &protoempty.Empty{}, nil
+	return resp, nil
 }
 
-func (s *Server) AddInputChunk(ctx context.Context, req *v1.AddInputChunkRequest) (*protoempty.Empty, error) {
+func (s *Server) AddInputChunk(ctx context.Context, req *v1.AddInputChunkRequest) (*v1.AddInputChunkResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 
 	if req.StreamContractId == 0 {
@@ -58,9 +65,12 @@ func (s *Server) AddInputChunk(ctx context.Context, req *v1.AddInputChunkRequest
 	span.SetTag("chunk_id", req.ChunkId)
 	span.SetTag("reward", req.Reward)
 
-	s.addInputChunkAsync(opentracing.ContextWithSpan(context.Background(), span), req)
+	resp, err := s.addInputChunk(ctx, req)
+	if err != nil {
+		return resp, rpc.NewRpcInternalError(err)
+	}
 
-	return &protoempty.Empty{}, nil
+	return resp, nil
 }
 
 func (s *Server) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.DepositResponse, error) {
@@ -72,9 +82,12 @@ func (s *Server) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.Depos
 	span.SetTag("user_id", req.UserId)
 	span.SetTag("to", toStr)
 
-	s.depositAsync(opentracing.ContextWithSpan(context.Background(), span), req.UserId, req.StreamId, to)
+	resp, err := s.deposit(ctx, req.UserId, req.StreamId, to)
+	if err != nil {
+		return resp, rpc.NewRpcInternalError(err)
+	}
 
-	return &v1.DepositResponse{}, nil
+	return resp, nil
 }
 
 func (s *Server) GetBalance(ctx context.Context, req *v1.BalanceRequest) (*v1.BalanceResponse, error) {
@@ -113,29 +126,32 @@ func (s *Server) ValidateProof(ctx context.Context, req *v1.ValidateProofRequest
 		"chunk_id":                chunkID.String(),
 	})
 
+	resp := &v1.ValidateProofResponse{}
+
 	logger.Info("validate proof")
 
 	tx, err := s.contract.ValidateProof(ctx, req.StreamContractAddress, profileID, chunkID)
 	if err != nil {
-		logger.
-			WithError(err).
-			Error("failed to validate proof")
-		return nil, rpc.ErrRpcInternal
+		logger.Errorf("failed to contract.ValidateProof: %s", err)
+		fmtErr := fmt.Errorf("failed to ValidateProof: %s", err)
+		return resp, rpc.NewRpcInternalError(fmtErr)
 	}
+
+	resp.Tx = tx.Hash().String()
+
+	logger = logger.WithField("tx", resp.Tx)
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("call", "ValidateProof").
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-		return nil, rpc.ErrRpcInternal
+		resp.Status = v1.ReceiptStatusFailed
+		logger.Errorf("failed to wait contract.ValidateProof: %s", err)
+		fmtErr := fmt.Errorf("failed to wait ValidateProof: %s", err)
+		return resp, rpc.NewRpcInternalError(fmtErr)
 	}
 
-	return &v1.ValidateProofResponse{
-		TxId: []byte(tx.Hash().String()),
-	}, nil
+	resp.Status = v1.ReceiptStatusSuccess
+
+	return resp, nil
 }
 
 func (s *Server) ScrapProof(ctx context.Context, req *v1.ScrapProofRequest) (*v1.ScrapProofResponse, error) {
@@ -154,29 +170,31 @@ func (s *Server) ScrapProof(ctx context.Context, req *v1.ScrapProofRequest) (*v1
 		"chunk_id":                chunkID.String(),
 	})
 
+	resp := &v1.ScrapProofResponse{}
+
 	logger.Info("scrap proof")
 
 	tx, err := s.contract.ScrapProof(ctx, req.StreamContractAddress, profileID, chunkID)
 	if err != nil {
-		logger.
-			WithError(err).
-			Error("failed to validate proof")
-		return nil, rpc.ErrRpcInternal
+		fmtErr := fmt.Errorf("failed to ScrapProof: %s", err)
+		return resp, rpc.NewRpcInternalError(fmtErr)
 	}
+
+	resp.Tx = tx.Hash().String()
+
+	logger = logger.WithField("tx", resp.Tx)
 
 	err = s.contract.WaitMinedAndCheck(tx)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("call", "ValidateProof").
-			WithField("tx", tx.Hash().String()).
-			Error("failed to wait mined")
-		return nil, rpc.ErrRpcInternal
+		resp.Status = v1.ReceiptStatusFailed
+		logger.Errorf("failed to wait contract.ScrapProof: %s", err)
+		fmtErr := fmt.Errorf("failed to wait ScrapProof: %s", err)
+		return resp, rpc.NewRpcInternalError(fmtErr)
 	}
 
-	return &v1.ScrapProofResponse{
-		TxId: []byte(tx.Hash().String()),
-	}, nil
+	resp.Status = v1.ReceiptStatusSuccess
+
+	return resp, nil
 }
 
 func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.ListWorkersResponse, error) {

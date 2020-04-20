@@ -6,7 +6,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
-	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-emitter/contract"
 	"github.com/videocoin/cloud-emitter/eventbus"
 	"github.com/videocoin/cloud-emitter/manager"
@@ -29,12 +28,6 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 	accounts := accountsv1.NewAccountServiceClient(conn)
-
-	conn, err = grpcutil.Connect(cfg.StreamsRPCAddr, cfg.Logger.WithField("system", "streamscli"))
-	if err != nil {
-		return nil, err
-	}
-	streams := streamsv1.NewStreamServiceClient(conn)
 
 	ethClient, err := ethclient.Dial(cfg.RPCNodeHTTPAddr)
 	if err != nil {
@@ -65,7 +58,6 @@ func NewService(cfg *Config) (*Service, error) {
 
 	rpcConfig := &rpc.ServerOpts{
 		Addr:     cfg.RPCAddr,
-		Streams:  streams,
 		Contract: contract,
 		Staking:  stakingClient,
 		Logger:   cfg.Logger.WithField("system", "rpc"),
@@ -111,7 +103,7 @@ func NewService(cfg *Config) (*Service, error) {
 
 func (s *Service) Start(errCh chan error) {
 	go func() {
-		s.cfg.Logger.Info("starting rpc server")
+		s.cfg.Logger.WithField("addr", s.cfg.RPCAddr).Info("starting rpc server")
 		errCh <- s.rpc.Start()
 	}()
 
@@ -125,5 +117,6 @@ func (s *Service) Start(errCh chan error) {
 
 func (s *Service) Stop() error {
 	s.manager.StopBackgroundTasks()
+	s.rpc.Stop()
 	return s.eb.Stop()
 }

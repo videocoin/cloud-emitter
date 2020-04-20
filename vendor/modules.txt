@@ -1,5 +1,7 @@
 # github.com/AlekSi/pointer v1.1.0
 github.com/AlekSi/pointer
+# github.com/TheZeroSlave/zapsentry v1.3.0
+github.com/TheZeroSlave/zapsentry
 # github.com/VictoriaMetrics/fastcache v1.5.3
 github.com/VictoriaMetrics/fastcache
 # github.com/aristanetworks/goarista v0.0.0-20190712234253-ed1100a1c015
@@ -82,6 +84,8 @@ github.com/evalphobia/logrus_sentry
 github.com/gballet/go-libpcsclite
 # github.com/getsentry/raven-go v0.2.0
 github.com/getsentry/raven-go
+# github.com/getsentry/sentry-go v0.3.0
+github.com/getsentry/sentry-go
 # github.com/go-stack/stack v1.8.0
 github.com/go-stack/stack
 # github.com/gogo/googleapis v1.3.0
@@ -248,8 +252,17 @@ github.com/videocoin/go-protocol/staking
 github.com/videocoin/go-staking
 # github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208
 github.com/wsddn/go-ecdh
-# go.uber.org/atomic v1.5.1
+# go.uber.org/atomic v1.6.0
 go.uber.org/atomic
+# go.uber.org/multierr v1.5.0
+go.uber.org/multierr
+# go.uber.org/zap v1.14.1
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
 golang.org/x/crypto/curve25519
 golang.org/x/crypto/pbkdf2
@@ -257,9 +270,6 @@ golang.org/x/crypto/ripemd160
 golang.org/x/crypto/scrypt
 golang.org/x/crypto/sha3
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f
-golang.org/x/lint
-golang.org/x/lint/golint
 # golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 golang.org/x/net/context
 golang.org/x/net/html
@@ -296,10 +306,6 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.0.0-20200128002243-345141a36859
-golang.org/x/tools/go/ast/astutil
-golang.org/x/tools/go/gcexportdata
-golang.org/x/tools/go/internal/gcimporter
 # google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 google.golang.org/genproto/googleapis/api/httpbody
 google.golang.org/genproto/googleapis/rpc/status

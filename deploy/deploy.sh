@@ -51,7 +51,6 @@ function get_vars() {
     log_info "Getting variables..."
     readonly KUBE_CONTEXT=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/common/kube_context`
     readonly ACCOUNTS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/accountsRpcAddr`
-    readonly STREAMS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/streamsRpcAddr`
     readonly STREAM_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/streamManagerContractAddr`
     readonly STAKING_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/stakingManagerContractAddr`
     readonly FAUCET_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/faucetUrl`
@@ -74,7 +73,6 @@ function deploy() {
         --set image.repository="gcr.io/${GCP_PROJECT}/${CHART_NAME}" \
         --set image.tag="${VERSION}" \
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
-        --set config.streamsRpcAddr="${STREAMS_RPC_ADDR}" \
         --set config.streamManagerContractAddr="${STREAM_MANAGER_CONTRACT_ADDR}" \
         --set config.stakingManagerContractAddr="${STAKING_MANAGER_CONTRACT_ADDR}" \
         --set config.faucetUrl="${FAUCET_URL}" \

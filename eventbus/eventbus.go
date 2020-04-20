@@ -34,9 +34,6 @@ func New(c *Config) (*EventBus, error) {
 	if err != nil {
 		return nil, err
 	}
-	if c.Logger != nil {
-		mq.Logger = c.Logger
-	}
 	return &EventBus{
 		logger: c.Logger,
 		faucet: c.Faucet,

@@ -45,11 +45,6 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: accountsRpcAddr
-            - name: STREAMS_RPC_ADDR
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: streamsRpcAddr
             - name: STREAM_MANAGER_CONTRACT_ADDR
               valueFrom:
                 configMapKeyRef:
