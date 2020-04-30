@@ -55,11 +55,6 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: stakingManagerContractAddr
-            - name: FAUCET_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: faucetUrl
             - name: SYMPHONY_ADDR
               valueFrom:
                 secretKeyRef:
