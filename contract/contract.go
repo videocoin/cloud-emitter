@@ -15,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	"github.com/videocoin/cloud-pkg/bcops"
-	sm "github.com/videocoin/cloud-pkg/streamManager"
+	sm "github.com/videocoin/go-protocol/streams"
 )
 
 type ClientOpts struct {
@@ -40,13 +40,13 @@ type Client struct {
 	validatorSecret string
 
 	ethClient     *ethclient.Client
-	streamManager *sm.Manager
+	streamManager *sm.StreamManager
 	accounts      accountsv1.AccountServiceClient
 }
 
 func NewContractClient(opts *ClientOpts) (*Client, error) {
 	address := common.HexToAddress(opts.ContractAddr)
-	manager, err := sm.NewManager(address, opts.EthClient)
+	manager, err := sm.NewStreamManager(address, opts.EthClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create smart contract stream manager: %s", err.Error())
 	}

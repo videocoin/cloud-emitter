@@ -28,7 +28,7 @@ autoscaler:
 #     memory: 1000Mi
 
 secrets:
-  rpcNodeHttpAddr: ""
+  symphonyAddr: ""
   managerKey: ""
   managerSecret: ""
   clientSecret: ""

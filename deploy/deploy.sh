@@ -55,7 +55,10 @@ function get_vars() {
     readonly STAKING_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/stakingManagerContractAddr`
     readonly FAUCET_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/faucetUrl`
 
-    readonly RPC_NODE_HTTP_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/rpcNodeHttpAddr`
+    readonly SYMPHONY_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/symphonyAddr`
+    readonly OAUTH_CLIENT_ID=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/oauthClientId`
+    readonly RPC_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/rpcKey`
+    readonly FAUCET_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/faucetKey`
     readonly MANAGER_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/managerKey`
     readonly MANAGER_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/managerSecret`
     readonly CLIENT_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/clientSecret`
@@ -75,8 +78,10 @@ function deploy() {
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
         --set config.streamManagerContractAddr="${STREAM_MANAGER_CONTRACT_ADDR}" \
         --set config.stakingManagerContractAddr="${STAKING_MANAGER_CONTRACT_ADDR}" \
-        --set config.faucetUrl="${FAUCET_URL}" \
-        --set secrets.rpcNodeHttpAddr="${RPC_NODE_HTTP_ADDR}" \
+        --set secrets.symphonyAddr="${SYMPHONY_ADDR}" \
+        --set secrets.oauthClientId="${OAUTH_CLIENT_ID}" \
+        --set secrets.rpcKey="${RPC_KEY}" \
+        --set secrets.faucetKey="${FAUCET_KEY}" \
         --set secrets.mqUri="${MQ_URI}" \
         --set secrets.managerKey="${MANAGER_KEY}" \
         --set secrets.managerSecret="${MANAGER_SECRET}" \

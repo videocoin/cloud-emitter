@@ -60,11 +60,26 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: faucetUrl
-            - name: RPC_NODE_HTTP_ADDR
+            - name: SYMPHONY_ADDR
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: rpcNodeHttpAddr
+                  key: symphonyAddr
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: oauthClientId
+            - name: RPC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: rpcKey
+            - name: FAUCET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: faucetKey
             - name: MANAGER_KEY
               valueFrom:
                 secretKeyRef:

@@ -3,8 +3,9 @@ package service
 import (
 	"fmt"
 
+	"github.com/videocoin/cloud-pkg/rpcutils"
+
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	"github.com/videocoin/cloud-emitter/contract"
 	"github.com/videocoin/cloud-emitter/eventbus"
@@ -29,7 +30,7 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	accounts := accountsv1.NewAccountServiceClient(conn)
 
-	ethClient, err := ethclient.Dial(cfg.RPCNodeHTTPAddr)
+	ethClient, err := rpcutils.SymphonyRPCClient(cfg.SymphonyAddr, cfg.OauthClientID, cfg.RPCKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
 	}
@@ -68,7 +69,8 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	faucet := faucetcli.NewClient(cfg.FaucetURL)
+	faucet := faucetcli.NewClient(fmt.Sprintf("%s/v1/faucet",
+		cfg.SymphonyAddr), faucetcli.WithTokenSource(cfg.OauthClientID, cfg.FaucetKey))
 	managerOpts := &manager.Opts{
 		Logger:   cfg.Logger.WithField("system", "manager"),
 		Faucet:   faucet,

@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/videocoin/cloud-pkg/ethutils"
-	"github.com/videocoin/cloud-pkg/stream"
+	"github.com/videocoin/go-protocol/streams"
 )
 
 func (c *Client) RequestStream(ctx context.Context, userID string, streamID *big.Int, profileNames []string) (*types.Transaction, error) {
@@ -143,7 +143,7 @@ func (c *Client) EscrowRefund(ctx context.Context, streamContractAddress string)
 		return nil, err
 	}
 
-	stream, err := stream.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
+	stream, err := streams.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +183,7 @@ func (c *Client) Deposit(ctx context.Context, userID string, to, value *big.Int)
 	}
 	opts.Value = value
 
-	s, err := stream.NewStream(common.BigToAddress(to), c.ethClient)
+	s, err := streams.NewStream(common.BigToAddress(to), c.ethClient)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func (c *Client) ValidateProof(ctx context.Context, streamContractAddress string
 	span, _ := opentracing.StartSpanFromContext(ctx, "ValidateProof")
 	defer span.Finish()
 
-	stream, err := stream.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
+	stream, err := streams.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new stream: %s", err.Error())
 	}
@@ -222,7 +222,7 @@ func (c *Client) ScrapProof(ctx context.Context, streamContractAddress string, p
 	span, _ := opentracing.StartSpanFromContext(ctx, "ScrapProof")
 	defer span.Finish()
 
-	stream, err := stream.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
+	stream, err := streams.NewStream(common.HexToAddress(streamContractAddress), c.ethClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new stream: %s", err.Error())
 	}

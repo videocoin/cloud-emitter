@@ -5,7 +5,6 @@ go 1.12
 require (
 	github.com/AlekSi/pointer v1.1.0
 	github.com/allegro/bigcache v1.2.1 // indirect
-	github.com/aristanetworks/goarista v0.0.0-20190712234253-ed1100a1c015 // indirect
 	github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/ethereum/go-ethereum v1.9.12
@@ -28,9 +27,11 @@ require (
 	github.com/uber-go/atomic v1.4.0 // indirect
 	github.com/videocoin/cloud-api v0.2.15
 	github.com/videocoin/cloud-pkg v0.0.6
+	github.com/videocoin/go-protocol v0.0.6
 	github.com/videocoin/go-staking v0.0.0-20200410180201-6944f4d9a28b
+	github.com/videocoin/oauth2 v0.0.0-20200420193217-d1533f241e14 // indirect
 	github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208 // indirect
-	google.golang.org/grpc v1.21.1
+	google.golang.org/grpc v1.27.1
 )
 
 replace github.com/videocoin/cloud-api => ../cloud-api
