@@ -3,8 +3,6 @@ package service
 import (
 	"fmt"
 
-	"github.com/videocoin/cloud-pkg/rpcutils"
-
 	"github.com/ethereum/go-ethereum/common"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	"github.com/videocoin/cloud-emitter/contract"
@@ -13,6 +11,7 @@ import (
 	"github.com/videocoin/cloud-emitter/rpc"
 	faucetcli "github.com/videocoin/cloud-pkg/faucet"
 	"github.com/videocoin/cloud-pkg/grpcutil"
+	"github.com/videocoin/cloud-pkg/rpcutils"
 	"github.com/videocoin/go-staking"
 )
 
@@ -57,11 +56,18 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
+	faucet := faucetcli.NewClient(
+		fmt.Sprintf("%s/v1/faucet", cfg.SymphonyAddr),
+		faucetcli.WithTokenSource(cfg.OauthClientID, cfg.FaucetKey),
+	)
+
 	rpcConfig := &rpc.ServerOpts{
 		Addr:     cfg.RPCAddr,
 		Contract: contract,
 		Staking:  stakingClient,
 		Logger:   cfg.Logger.WithField("system", "rpc"),
+		Accounts: accounts,
+		Faucet:   faucet,
 	}
 
 	rpc, err := rpc.NewRPCServer(rpcConfig)
@@ -69,8 +75,6 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	faucet := faucetcli.NewClient(fmt.Sprintf("%s/v1/faucet",
-		cfg.SymphonyAddr), faucetcli.WithTokenSource(cfg.OauthClientID, cfg.FaucetKey))
 	managerOpts := &manager.Opts{
 		Logger:   cfg.Logger.WithField("system", "manager"),
 		Faucet:   faucet,

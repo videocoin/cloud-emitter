@@ -11,6 +11,7 @@ import (
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
+	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	"google.golang.org/grpc/codes"
@@ -216,6 +217,22 @@ func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.Li
 			DelegatedStake: worker.DelegatedStake.String(),
 			RegisteredAt:   pointer.ToTime(time.Unix(int64(worker.Timestamp), 0)),
 		})
+	}
+
+	return resp, nil
+}
+
+func (s *Server) AddFunds(ctx context.Context, req *v1.AddFundsRequest) (*v1.AddFundsResponse, error) {
+	resp := new(v1.AddFundsResponse)
+	accountReq := &accountsv1.AccountRequest{OwnerId: req.UserID}
+	accountResp, err := s.accounts.GetByOwner(ctx, accountReq)
+	if err != nil {
+		return resp, err
+	}
+
+	err = s.faucet.Do(accountResp.Address, uint64(req.AmountUsd)+1)
+	if err != nil {
+		return resp, err
 	}
 
 	return resp, nil

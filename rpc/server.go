@@ -3,12 +3,13 @@ package rpc
 import (
 	"net"
 
-	"github.com/videocoin/go-staking"
-
 	"github.com/sirupsen/logrus"
+	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-emitter/contract"
+	faucetcli "github.com/videocoin/cloud-pkg/faucet"
 	"github.com/videocoin/cloud-pkg/grpcutil"
+	"github.com/videocoin/go-staking"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
@@ -20,6 +21,8 @@ type ServerOpts struct {
 	Addr     string
 	Contract *contract.Client
 	Staking  *staking.Client
+	Accounts accountsv1.AccountServiceClient
+	Faucet   *faucetcli.Client
 }
 
 type Server struct {
@@ -29,6 +32,8 @@ type Server struct {
 	listen   net.Listener
 	contract *contract.Client
 	staking  *staking.Client
+	accounts accountsv1.AccountServiceClient
+	faucet   *faucetcli.Client
 }
 
 func NewRPCServer(opts *ServerOpts) (*Server, error) {
@@ -50,6 +55,8 @@ func NewRPCServer(opts *ServerOpts) (*Server, error) {
 		listen:   listen,
 		contract: opts.Contract,
 		staking:  opts.Staking,
+		accounts: opts.Accounts,
+		faucet:   opts.Faucet,
 	}
 
 	v1.RegisterEmitterServiceServer(grpcServer, rpcServer)
