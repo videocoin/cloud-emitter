@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"time"
 
+	ethcore "github.com/ethereum/go-ethereum/core"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
@@ -184,12 +186,20 @@ func (s *Server) addInputChunk(ctx context.Context, req *v1.AddInputChunkRequest
 
 	tx, err := s.contract.AddInputChunkID(ctx, streamID, chunkID, rewards)
 	if err != nil {
-		if tx != nil {
-			resp.Tx = tx.Hash().String()
-			logger = logger.WithField("tx", tx.Hash().String())
+		if err.Error() == ethcore.ErrNonceTooLow.Error() ||
+			err.Error() == ethcore.ErrReplaceUnderpriced.Error() {
+			logger.Info("add input chunk (retry)")
+			time.Sleep(time.Millisecond * 500)
+			var retryErr error
+			tx, retryErr = s.contract.AddInputChunkID(ctx, streamID, chunkID, rewards)
+			if retryErr != nil {
+				logger.Errorf("failed to retry contract.AddInputChunkID: %s", retryErr)
+				return resp, fmt.Errorf("failed to retry contract.AddInputChunkID: %s", retryErr)
+			}
+		} else {
+			logger.Errorf("failed to contract.AddInputChunkID: %s", err)
+			return resp, fmt.Errorf("failed to add input chunk: %s", err)
 		}
-		logger.Errorf("failed to contract.AddInputChunkID: %s", err)
-		return resp, fmt.Errorf("failed to add input chunk: %s", err)
 	}
 
 	resp.Tx = tx.Hash().String()

@@ -8,6 +8,7 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/ethereum/go-ethereum/common"
+	ethcore "github.com/ethereum/go-ethereum/core"
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
@@ -133,9 +134,21 @@ func (s *Server) ValidateProof(ctx context.Context, req *v1.ValidateProofRequest
 
 	tx, err := s.contract.ValidateProof(ctx, req.StreamContractAddress, profileID, chunkID)
 	if err != nil {
-		logger.Errorf("failed to contract.ValidateProof: %s", err)
-		fmtErr := fmt.Errorf("failed to ValidateProof: %s", err)
-		return resp, rpc.NewRpcInternalError(fmtErr)
+		if err.Error() == ethcore.ErrNonceTooLow.Error() ||
+			err.Error() == ethcore.ErrReplaceUnderpriced.Error() {
+			logger.Info("validate proof (retry)")
+			time.Sleep(time.Millisecond * 500)
+			var retryErr error
+			tx, retryErr = s.contract.ValidateProof(ctx, req.StreamContractAddress, profileID, chunkID)
+			if retryErr != nil {
+				logger.Errorf("failed to retry contract.ValidateProof: %s", retryErr)
+				return resp, fmt.Errorf("failed to retry ValidateProof: %s", retryErr)
+			}
+		} else {
+			logger.Errorf("failed to contract.ValidateProof: %s", err)
+			fmtErr := fmt.Errorf("failed to ValidateProof: %s", err)
+			return resp, rpc.NewRpcInternalError(fmtErr)
+		}
 	}
 
 	resp.Tx = tx.Hash().String()
