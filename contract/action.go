@@ -212,7 +212,7 @@ func (c *Client) ValidateProof(ctx context.Context, streamContractAddress string
 
 	tx, err := stream.ValidateProof(transactOpts, profileID, chunkID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to validate proof: %s", err.Error())
+		return nil, err
 	}
 
 	return tx, nil
@@ -234,7 +234,7 @@ func (c *Client) ScrapProof(ctx context.Context, streamContractAddress string, p
 
 	tx, err := stream.ScrapProof(transactOpts, profileID, chunkID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scrap proof: %s", err.Error())
+		return nil, err
 	}
 
 	return tx, nil
