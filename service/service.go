@@ -34,7 +34,7 @@ func NewService(cfg *Config) (*Service, error) {
 
 	contractOpts := &contract.ClientOpts{
 		EthClient:    ethClient,
-		ContractAddr: "0x000000000000000000000000000000000000101",
+		ContractAddr: cfg.StreamManagerContractAddr,
 		ClientSecret: cfg.ClientSecret,
 		Accounts:     accounts,
 	}
