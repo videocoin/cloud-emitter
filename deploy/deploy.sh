@@ -54,9 +54,9 @@ function get_vars() {
     readonly STREAM_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/streamManagerContractAddr`
     readonly STAKING_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/stakingManagerContractAddr`
     readonly SYMPHONY_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/symphonyAddr`
-    readonly OAUTH_CLIENT_ID=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/oauthClientId`
-    readonly RPC_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/rpcKey`
-    readonly FAUCET_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/faucetKey`
+    readonly SYMPHONY_OAUTH_CLIENT_ID=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/oauthClientId`
+    readonly SYMPHONY_RPC_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/rpcKey`
+    readonly SYMPHONY_FAUCET_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/faucetKey`
     readonly CLIENT_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/clientSecret`
     readonly MQ_URI=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/mqUri`
     readonly SENTRY_DSN=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/sentryDsn`
@@ -73,9 +73,9 @@ function deploy() {
         --set config.streamManagerContractAddr="${STREAM_MANAGER_CONTRACT_ADDR}" \
         --set config.stakingManagerContractAddr="${STAKING_MANAGER_CONTRACT_ADDR}" \
         --set secrets.symphonyAddr="${SYMPHONY_ADDR}" \
-        --set secrets.oauthClientId="${OAUTH_CLIENT_ID}" \
-        --set secrets.rpcKey="${RPC_KEY}" \
-        --set secrets.faucetKey="${FAUCET_KEY}" \
+        --set secrets.symphonyOauthClientId="${SYMPHONY_OAUTH_CLIENT_ID}" \
+        --set secrets.symphonyRpcKey="${SYMPHONY_RPC_KEY}" \
+        --set secrets.symphonyFaucetKey="${SYMPHONY_FAUCET_KEY}" \
         --set secrets.mqUri="${MQ_URI}" \
         --set secrets.clientSecret="${CLIENT_SECRET}" \
         --set secrets.sentryDsn="${SENTRY_DSN}" \

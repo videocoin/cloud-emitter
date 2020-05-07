@@ -60,21 +60,21 @@ spec:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: symphonyAddr
-            - name: OAUTH_CLIENT_ID
+            - name: SYMPHONY_OAUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: oauthClientId
-            - name: RPC_KEY
+                  key: symphonyOauthClientId
+            - name: SYMPHONY_RPC_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: rpcKey
-            - name: FAUCET_KEY
+                  key: symphonyRpcKey
+            - name: SYMPHONY_FAUCET_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
-                  key: faucetKey
+                  key: symphonyFaucetKey
             - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
