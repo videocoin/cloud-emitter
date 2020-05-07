@@ -12,7 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/opentracing/opentracing-go"
-	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	"github.com/videocoin/cloud-pkg/bcops"
 	sm "github.com/videocoin/go-protocol/streams"
@@ -21,13 +20,11 @@ import (
 type ClientOpts struct {
 	EthClient    *ethclient.Client
 	ContractAddr string
-	Logger       *logrus.Entry
 	Accounts     accountsv1.AccountServiceClient
 	ClientSecret string
 }
 
 type Client struct {
-	logger        *logrus.Entry
 	clientSecret  string
 	ethClient     *ethclient.Client
 	streamManager *sm.StreamManager
@@ -43,7 +40,6 @@ func NewContractClient(opts *ClientOpts) (*Client, error) {
 
 	return &Client{
 		ethClient:     opts.EthClient,
-		logger:        opts.Logger,
 		accounts:      opts.Accounts,
 		clientSecret:  opts.ClientSecret,
 		streamManager: manager,

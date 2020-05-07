@@ -439,18 +439,26 @@ func shuffle(vals []*KSItem) []*KSItem {
 
 func GetManagerKS() ([]byte, string) {
 	// item := managerKSPool.Next()
+	// item := &KSItem{
+	// 	Key:    `{"address": "052e1b586d44c23739d028efad5b88cca010ac5a", "crypto": {"cipher": "aes-128-ctr", "cipherparams": {"iv": "39c7336302f5c6fa99e6eb381b130ef3"}, "ciphertext": "fb33cc60f898dd1e6c1d7735ed4e3ea2365f000e5284f05f783ce24f5175fa11", "kdf": "scrypt", "kdfparams": {"dklen": 32, "n": 262144, "r": 1, "p": 8, "salt": "f5665920b74febae89c2db2b1cb56228"}, "mac": "cf84492af914e3dcf2209d68572628202a3105ebe08822a68c5faeb62a56bbc2"}, "id": "6e9d267e-e96d-49aa-a43a-5e8422bf20aa", "version": 3}`,
+	// 	Secret: "35d1xll0rvvpcj5icj",
+	// }
 	item := &KSItem{
-		Key:    `{"address": "052e1b586d44c23739d028efad5b88cca010ac5a", "crypto": {"cipher": "aes-128-ctr", "cipherparams": {"iv": "39c7336302f5c6fa99e6eb381b130ef3"}, "ciphertext": "fb33cc60f898dd1e6c1d7735ed4e3ea2365f000e5284f05f783ce24f5175fa11", "kdf": "scrypt", "kdfparams": {"dklen": 32, "n": 262144, "r": 1, "p": 8, "salt": "f5665920b74febae89c2db2b1cb56228"}, "mac": "cf84492af914e3dcf2209d68572628202a3105ebe08822a68c5faeb62a56bbc2"}, "id": "6e9d267e-e96d-49aa-a43a-5e8422bf20aa", "version": 3}`,
-		Secret: "35d1xll0rvvpcj5icj",
+		Key:    `{"address":"3f374c806ef204cadb31540d013a433af4946b51","crypto":{"cipher":"aes-128-ctr","ciphertext":"1174eb268e03c6f3a3f092a9fb73bb26ae9f7096f7930581f7ef61b75b969b68","cipherparams":{"iv":"2a7c091b4d185ce09ff7b9fffaf3c324"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"3e8098d4b00570bfe56f2f620c9bb6fd337f8ea2dda8e35ed65f1b22eb3dd33b"},"mac":"7dcc928c66d24be429606abdcf5b9b7a345e0ec261fbfe5a5ce2490e7656b13e"},"id":"0ba3c6c1-c08b-4618-bf38-5f3ad066dc35","version":3}`,
+		Secret: "cKHcjwccz+8XiA==",
 	}
 	return []byte(item.Key), item.Secret
 }
 
 func GetValidatorKS() ([]byte, string) {
 	// item := validatorKSPool.Next()
+	// item := &KSItem{
+	// 	Key:    `{"address": "148c0d7597767c0bacc36d49b8f3dffac4a0822f", "crypto": {"cipher": "aes-128-ctr", "cipherparams": {"iv": "28de6cb7d8a4eb29f5cd0eb125e36200"}, "ciphertext": "f44ae0f1507d4aed634064fc77f893d2e74d8777e846e71e68da886095193683", "kdf": "scrypt", "kdfparams": {"dklen": 32, "n": 262144, "r": 1, "p": 8, "salt": "49a8d908ee909765bc342b9a6bf9166e"}, "mac": "fbba4932760ed2a2073f9734332f59eaa510b15b9308a429ff88025fc120b2f0"}, "id": "6df76ee3-8c55-43e2-a4f9-61fd95ddf170", "version": 3}`,
+	// 	Secret: "t5qqdr66wh0sv7w1ry",
+	// }
 	item := &KSItem{
-		Key:    `{"address": "148c0d7597767c0bacc36d49b8f3dffac4a0822f", "crypto": {"cipher": "aes-128-ctr", "cipherparams": {"iv": "28de6cb7d8a4eb29f5cd0eb125e36200"}, "ciphertext": "f44ae0f1507d4aed634064fc77f893d2e74d8777e846e71e68da886095193683", "kdf": "scrypt", "kdfparams": {"dklen": 32, "n": 262144, "r": 1, "p": 8, "salt": "49a8d908ee909765bc342b9a6bf9166e"}, "mac": "fbba4932760ed2a2073f9734332f59eaa510b15b9308a429ff88025fc120b2f0"}, "id": "6df76ee3-8c55-43e2-a4f9-61fd95ddf170", "version": 3}`,
-		Secret: "t5qqdr66wh0sv7w1ry",
+		Key:    `{"address":"09c41a3865846090e71fe454c1a2c8c9dbdfe7f9","crypto":{"cipher":"aes-128-ctr","ciphertext":"047ceabb04068e4883e5220870db3e69b3876a8168a1e2d157eca23c1e076e55","cipherparams":{"iv":"2b6772587a6d6faa849b5ca25f6624f8"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"ccfdc109e319a4809ca350b44b1ef21cb6f3ab3140535b0bf66431137a4edf38"},"mac":"0cecad70e46d2cb85a753825b4699cdb312ba50f2cda276272e75471b96993ca"},"id":"09337b37-1085-469b-8e78-70124f77fc42","version":3}`,
+		Secret: "Z6B5eTbgvqxIeL4",
 	}
 	return []byte(item.Key), item.Secret
 }
