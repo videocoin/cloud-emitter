@@ -57,11 +57,7 @@ function get_vars() {
     readonly OAUTH_CLIENT_ID=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/oauthClientId`
     readonly RPC_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/rpcKey`
     readonly FAUCET_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/faucetKey`
-    readonly MANAGER_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/managerKey`
-    readonly MANAGER_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/managerSecret`
     readonly CLIENT_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/clientSecret`
-    readonly VALIDATOR_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/validatorKey`
-    readonly VALIDATOR_SECRET=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/validatorSecret`
     readonly MQ_URI=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/mqUri`
     readonly SENTRY_DSN=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/sentryDsn`
 }
@@ -81,11 +77,7 @@ function deploy() {
         --set secrets.rpcKey="${RPC_KEY}" \
         --set secrets.faucetKey="${FAUCET_KEY}" \
         --set secrets.mqUri="${MQ_URI}" \
-        --set secrets.managerKey="${MANAGER_KEY}" \
-        --set secrets.managerSecret="${MANAGER_SECRET}" \
         --set secrets.clientSecret="${CLIENT_SECRET}" \
-        --set secrets.validatorKey="${VALIDATOR_KEY}" \
-        --set secrets.validatorSecret="${VALIDATOR_SECRET}" \
         --set secrets.sentryDsn="${SENTRY_DSN}" \
         --wait ${CHART_NAME} ${CHART_DIR}
 }

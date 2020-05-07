@@ -17,9 +17,6 @@ func (c *Client) RequestStream(ctx context.Context, userID string, streamID *big
 	span, ctx := opentracing.StartSpanFromContext(ctx, "RequestStream")
 	defer span.Finish()
 
-	span.SetTag("user_id", userID)
-	span.SetTag("stream_id", streamID.Uint64())
-
 	transactOpts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -37,8 +34,6 @@ func (c *Client) GetStreamAddress(ctx context.Context, streamID *big.Int) (strin
 	span, _ := opentracing.StartSpanFromContext(ctx, "GetStreamAddress")
 	defer span.Finish()
 
-	span.SetTag("stream_id", streamID.Uint64())
-
 	s, err := c.streamManager.Requests(new(bind.CallOpts), streamID)
 	if err != nil {
 		return "", err
@@ -51,17 +46,13 @@ func (c *Client) ApproveStream(ctx context.Context, streamID *big.Int) (*types.T
 	span, ctx := opentracing.StartSpanFromContext(ctx, "ApproveStream")
 	defer span.Finish()
 
-	span.SetTag("stream_id", streamID.Uint64())
-
-	transactOpts, err := c.getManagerTransactOpts(ctx)
+	k, s := GetManagerKS()
+	opts, err := c.getManagerTransactOpts(ctx, c.ethClient, k, s)
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := c.streamManager.ApproveStreamCreation(
-		transactOpts,
-		streamID,
-	)
+	tx, err := c.streamManager.ApproveStreamCreation(opts, streamID)
 	if err != nil {
 		return nil, err
 	}
@@ -73,20 +64,14 @@ func (c *Client) CreateStream(ctx context.Context, userID string, streamID *big.
 	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
 	defer span.Finish()
 
-	span.SetTag("user_id", userID)
-	span.SetTag("stream_id", streamID.Uint64())
-
-	transactOpts, err := c.getClientTransactOpts(ctx, userID)
+	opts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	transactOpts.Value = ethutils.EthToWei(5)
+	opts.Value = ethutils.EthToWei(5)
 
-	tx, err := c.streamManager.CreateStream(
-		transactOpts,
-		streamID,
-	)
+	tx, err := c.streamManager.CreateStream(opts, streamID)
 	if err != nil {
 		return nil, err
 	}
@@ -98,18 +83,12 @@ func (c *Client) EndStream(ctx context.Context, userID string, streamID *big.Int
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EndStream")
 	defer span.Finish()
 
-	span.SetTag("user_id", userID)
-	span.SetTag("stream_id", streamID.Uint64())
-
-	transactOpts, err := c.getClientTransactOpts(ctx, userID)
+	opts, err := c.getClientTransactOpts(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := c.streamManager.EndStream(
-		transactOpts,
-		streamID,
-	)
+	tx, err := c.streamManager.EndStream(opts, streamID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +100,13 @@ func (c *Client) AllowRefund(ctx context.Context, streamID *big.Int) (*types.Tra
 	span, ctx := opentracing.StartSpanFromContext(ctx, "AllowRefund")
 	defer span.Finish()
 
-	transactOpts, err := c.getManagerTransactOpts(ctx)
+	k, s := GetManagerKS()
+	opts, err := c.getManagerTransactOpts(ctx, c.ethClient, k, s)
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := c.streamManager.AllowRefund(transactOpts, streamID)
+	tx, err := c.streamManager.AllowRefund(opts, streamID)
 	if err != nil {
 		return nil, nil
 	}
@@ -138,7 +118,8 @@ func (c *Client) EscrowRefund(ctx context.Context, streamContractAddress string)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "EscrowRefund")
 	defer span.Finish()
 
-	transactOpts, err := c.getManagerTransactOpts(ctx)
+	k, s := GetManagerKS()
+	opts, err := c.getManagerTransactOpts(ctx, c.ethClient, k, s)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +129,7 @@ func (c *Client) EscrowRefund(ctx context.Context, streamContractAddress string)
 		return nil, err
 	}
 
-	tx, err := stream.Refund(transactOpts)
+	tx, err := stream.Refund(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -160,12 +141,13 @@ func (c *Client) AddInputChunkID(ctx context.Context, streamID, chunkID *big.Int
 	span, _ := opentracing.StartSpanFromContext(ctx, "addInputchunkId")
 	defer span.Finish()
 
-	transactOpts, err := c.getManagerTransactOpts(ctx)
+	k, s := GetManagerKS()
+	opts, err := c.getManagerTransactOpts(ctx, c.ethClient, k, s)
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := c.streamManager.AddInputChunkId(transactOpts, streamID, chunkID, rewards)
+	tx, err := c.streamManager.AddInputChunkId(opts, streamID, chunkID, rewards)
 	if err != nil {
 		return nil, err
 	}
@@ -205,12 +187,13 @@ func (c *Client) ValidateProof(ctx context.Context, streamContractAddress string
 		return nil, fmt.Errorf("failed to create new stream: %s", err.Error())
 	}
 
-	transactOpts, err := getTransactOpts(context.Background(), c.ethClient, c.validatorKey, c.validatorSecret)
+	k, s := GetValidatorKS()
+	opts, err := getValidatorTransactOpts(ctx, c.ethClient, k, s)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get transact opts: %s", err.Error())
 	}
 
-	tx, err := stream.ValidateProof(transactOpts, profileID, chunkID)
+	tx, err := stream.ValidateProof(opts, profileID, chunkID)
 	if err != nil {
 		return nil, err
 	}
@@ -227,12 +210,13 @@ func (c *Client) ScrapProof(ctx context.Context, streamContractAddress string, p
 		return nil, fmt.Errorf("failed to create new stream: %s", err.Error())
 	}
 
-	transactOpts, err := getTransactOpts(context.Background(), c.ethClient, c.validatorKey, c.validatorSecret)
+	k, s := GetValidatorKS()
+	opts, err := getValidatorTransactOpts(ctx, c.ethClient, k, s)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get transact opts: %s", err.Error())
 	}
 
-	tx, err := stream.ScrapProof(transactOpts, profileID, chunkID)
+	tx, err := stream.ScrapProof(opts, profileID, chunkID)
 	if err != nil {
 		return nil, err
 	}

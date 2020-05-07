@@ -14,17 +14,13 @@ type Config struct {
 	AccountsRPCAddr string `envconfig:"ACCOUNTS_RPC_ADDR" default:"0.0.0.0:5001"`
 	MQURI           string `envconfig:"MQURI" default:"amqp://guest:guest@127.0.0.1:5672"`
 
-	SymphonyAddr  string `envconfig:"SYMPHONY_ADDR" required:"true"`
-	OauthClientID string `envconfig:"OAUTH_CLIENT_ID" required:"true"`
-	RPCKey        string `envconfig:"RPC_KEY" required:"true"`
-	FaucetKey     string `envconfig:"FAUCET_KEY" required:"true"`
+	SymphonyAddr          string `envconfig:"SYMPHONY_ADDR" required:"true"`
+	SymphonyOauthClientID string `envconfig:"OAUTH_CLIENT_ID" required:"true"`
+	SymphonyRPCKey        string `envconfig:"RPC_KEY" required:"true"`
+	SymphonyFaucetKey     string `envconfig:"FAUCET_KEY" required:"true"`
 
 	StreamManagerContractAddr  string `envconfig:"STREAM_MANAGER_CONTRACT_ADDR" required:"true"`
 	StakingManagerContractAddr string `envconfig:"STAKING_MANAGER_CONTRACT_ADDR" required:"true"`
 
-	ManagerKey      string `envconfig:"MANAGER_KEY" required:"true"`
-	ManagerSecret   string `envconfig:"MANAGER_SECRET" required:"true"`
-	ClientSecret    string `envconfig:"CLIENT_SECRET" required:"true"`
-	ValidatorKey    string `envconfig:"VALIDATOR_KEY" required:"true"`
-	ValidatorSecret string `envconfig:"VALIDATOR_SECRET" required:"true"`
+	ClientSecret string `envconfig:"CLIENT_SECRET" required:"true"`
 }

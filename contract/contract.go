@@ -19,26 +19,16 @@ import (
 )
 
 type ClientOpts struct {
-	EthClient       *ethclient.Client
-	ContractAddr    string
-	Logger          *logrus.Entry
-	Accounts        accountsv1.AccountServiceClient
-	ClientSecret    string
-	ManagerKey      string
-	ManagerSecret   string
-	ValidatorKey    string
-	ValidatorSecret string
+	EthClient    *ethclient.Client
+	ContractAddr string
+	Logger       *logrus.Entry
+	Accounts     accountsv1.AccountServiceClient
+	ClientSecret string
 }
 
 type Client struct {
-	logger *logrus.Entry
-
-	clientSecret    string
-	managerKey      string
-	managerSecret   string
-	validatorKey    string
-	validatorSecret string
-
+	logger        *logrus.Entry
+	clientSecret  string
 	ethClient     *ethclient.Client
 	streamManager *sm.StreamManager
 	accounts      accountsv1.AccountServiceClient
@@ -52,15 +42,11 @@ func NewContractClient(opts *ClientOpts) (*Client, error) {
 	}
 
 	return &Client{
-		ethClient:       opts.EthClient,
-		logger:          opts.Logger,
-		accounts:        opts.Accounts,
-		clientSecret:    opts.ClientSecret,
-		managerKey:      opts.ManagerKey,
-		managerSecret:   opts.ManagerSecret,
-		validatorKey:    opts.ValidatorKey,
-		validatorSecret: opts.ValidatorSecret,
-		streamManager:   manager,
+		ethClient:     opts.EthClient,
+		logger:        opts.Logger,
+		accounts:      opts.Accounts,
+		clientSecret:  opts.ClientSecret,
+		streamManager: manager,
 	}, nil
 }
 
@@ -71,19 +57,16 @@ func (c *Client) getClientTransactOpts(ctx context.Context, userID string) (*bin
 	keyReq := &accountsv1.AccountRequest{OwnerId: userID}
 	key, err := c.accounts.Key(ctx, keyReq)
 	if err != nil {
-		c.logger.WithError(err).WithField("user_id", userID).Error("failed to get account key")
 		return nil, err
 	}
 
 	decrypted, err := keystore.DecryptKey([]byte(key.Key), c.clientSecret)
 	if err != nil {
-		c.logger.WithError(err).WithField("key", []byte(key.Key)).Error("failed to decrypt key")
 		return nil, err
 	}
 
 	transactOpts, err := bcops.GetBCAuth(c.ethClient, decrypted)
 	if err != nil {
-		c.logger.WithError(err).Error("failed to get bc auth")
 		return nil, err
 	}
 
@@ -94,40 +77,38 @@ func (c *Client) getClientTransactOpts(ctx context.Context, userID string) (*bin
 	return transactOpts, nil
 }
 
-func (c *Client) getManagerTransactOpts(ctx context.Context) (*bind.TransactOpts, error) {
+func (c *Client) getManagerTransactOpts(ctx context.Context, client *ethclient.Client, key []byte, secret string) (*bind.TransactOpts, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "getManagerTransactOpts")
 	defer span.Finish()
 
-	decrypted, err := keystore.DecryptKey([]byte(c.managerKey), c.managerSecret)
+	decrypted, err := keystore.DecryptKey(key, secret)
 	if err != nil {
-		c.logger.WithError(err).WithField("key", []byte(c.managerKey)).Error("failed to decrypt key")
 		return nil, err
 	}
 
-	transactOpts, err := bcops.GetBCAuth(c.ethClient, decrypted)
+	opts, err := bcops.GetBCAuth(client, decrypted)
 	if err != nil {
-		c.logger.WithError(err).Error("failed to get bc auth")
 		return nil, err
 	}
 
-	return transactOpts, nil
+	return opts, nil
 }
 
-func getTransactOpts(ctx context.Context, client *ethclient.Client, key, secret string) (*bind.TransactOpts, error) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "getTransactOpts")
+func getValidatorTransactOpts(ctx context.Context, client *ethclient.Client, key []byte, secret string) (*bind.TransactOpts, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "getValidatorTransactOpts")
 	defer span.Finish()
 
-	decrypted, err := keystore.DecryptKey([]byte(key), secret)
+	decrypted, err := keystore.DecryptKey(key, secret)
 	if err != nil {
 		return nil, err
 	}
 
-	transactOpts, err := bcops.GetBCAuth(client, decrypted)
+	opts, err := bcops.GetBCAuth(client, decrypted)
 	if err != nil {
 		return nil, err
 	}
 
-	return transactOpts, nil
+	return opts, nil
 }
 
 func (c *Client) WaitMined(tx *types.Transaction) (*types.Receipt, error) {

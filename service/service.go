@@ -27,21 +27,17 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	accounts := accountsv1.NewAccountServiceClient(conn)
 
-	ethClient, err := rpcutils.SymphonyRPCClient(cfg.SymphonyAddr, cfg.OauthClientID, cfg.RPCKey)
+	ethClient, err := rpcutils.SymphonyRPCClient(cfg.SymphonyAddr, cfg.SymphonyOauthClientID, cfg.SymphonyRPCKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
 	}
 
 	contractOpts := &contract.ClientOpts{
-		EthClient:       ethClient,
-		ContractAddr:    cfg.StreamManagerContractAddr,
-		Accounts:        accounts,
-		ClientSecret:    cfg.ClientSecret,
-		ManagerKey:      cfg.ManagerKey,
-		ManagerSecret:   cfg.ManagerSecret,
-		ValidatorKey:    cfg.ValidatorKey,
-		ValidatorSecret: cfg.ValidatorSecret,
-		Logger:          cfg.Logger.WithField("system", "contract"),
+		Logger:       cfg.Logger.WithField("system", "contract"),
+		EthClient:    ethClient,
+		ContractAddr: cfg.StreamManagerContractAddr,
+		ClientSecret: cfg.ClientSecret,
+		Accounts:     accounts,
 	}
 
 	contract, err := contract.NewContractClient(contractOpts)
@@ -56,7 +52,7 @@ func NewService(cfg *Config) (*Service, error) {
 
 	faucet := faucetcli.NewClient(
 		fmt.Sprintf("%s/v1/faucet", cfg.SymphonyAddr),
-		faucetcli.WithTokenSource(cfg.OauthClientID, cfg.FaucetKey),
+		faucetcli.WithTokenSource(cfg.SymphonyOauthClientID, cfg.SymphonyFaucetKey),
 	)
 
 	rpcConfig := &rpc.ServerOpts{
