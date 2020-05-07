@@ -212,7 +212,10 @@ func (s *Server) ScrapProof(ctx context.Context, req *v1.ScrapProofRequest) (*v1
 }
 
 func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.ListWorkersResponse, error) {
-	workers, err := s.staking.GetAllTranscoders(ctx)
+	span := opentracing.SpanFromContext(ctx)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+
+	workers, err := s.staking.GetAllTranscoders(otCtx)
 	if err != nil {
 		return nil, rpc.NewRpcInternalError(err)
 	}
