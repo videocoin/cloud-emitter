@@ -265,10 +265,6 @@ var validatorKS = []*KSItem{
 		Secret: "r594dp5wfx63ibujoo",
 	},
 	{
-		Key:    "{\"address\": \"0bc40fcb4d5edd127ba4efa9cf6919e3fea4dcf9\", \"crypto\": {\"cipher\": \"aes-128-ctr\", \"cipherparams\": {\"iv\": \"3f47743071056f28d915916c2de7a3\"}, \"ciphertext\": \"43003e08993ec72bfc3e6f4ea1fb213daf7887e00bc519c8fbd80b5020b405f8\", \"kdf\": \"scrypt\", \"kdfparams\": {\"dklen\": 32, \"n\": 262144, \"r\": 1, \"p\": 8, \"salt\": \"a3c52d62eadfa679fb8d275c9e48f75d\"}, \"mac\": \"789591281a764dee0e0e37d28fd90cd6afb480052313248389b19d23808e37fb\"}, \"id\": \"cc2db42f-0277-4338-8e4a-b3f81232e560\", \"version\": 3}",
-		Secret: "7nsi0azl5488af7usy",
-	},
-	{
 		Key:    "{\"address\": \"df410306600c9219eddc13d9258002b820ec133a\", \"crypto\": {\"cipher\": \"aes-128-ctr\", \"cipherparams\": {\"iv\": \"f80fac115528237312928471378c8e2b\"}, \"ciphertext\": \"a3ed14222649fbac6085cda17831061038001839e9fc93e9188fb888c312c873\", \"kdf\": \"scrypt\", \"kdfparams\": {\"dklen\": 32, \"n\": 262144, \"r\": 1, \"p\": 8, \"salt\": \"3a82e2c0a8494a3629f5b008c048f17b\"}, \"mac\": \"5a3a1195ccca6133ef93cc22579791b072095cd4a86b81a49774b0eb80b6127e\"}, \"id\": \"ee75f6ae-4942-4288-a099-a3c619918e71\", \"version\": 3}",
 		Secret: "b9mb8nc776swztge02",
 	},
