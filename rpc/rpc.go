@@ -238,6 +238,32 @@ func (s *Server) ListWorkers(ctx context.Context, req *protoempty.Empty) (*v1.Li
 	return resp, nil
 }
 
+func (s *Server) GetWorker(ctx context.Context, req *v1.WorkerRequest) (*v1.WorkerResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+
+	if !common.IsHexAddress(req.Address) {
+		return nil, rpc.ErrRpcBadRequest
+	}
+
+	address := common.HexToAddress(req.Address)
+	worker, err := s.staking.GetTranscoder(otCtx, address)
+	if err != nil {
+		return nil, rpc.NewRpcInternalError(err)
+	}
+
+	resp := &v1.WorkerResponse{
+		Address:        worker.Address.Hex(),
+		State:          v1.WorkerState(worker.State),
+		TotalStake:     worker.TotalStake.String(),
+		SelfStake:      worker.SelfStake.String(),
+		DelegatedStake: worker.DelegatedStake.String(),
+		RegisteredAt:   pointer.ToTime(time.Unix(int64(worker.Timestamp), 0)),
+	}
+
+	return resp, nil
+}
+
 func (s *Server) AddFunds(ctx context.Context, req *v1.AddFundsRequest) (*v1.AddFundsResponse, error) {
 	resp := new(v1.AddFundsResponse)
 	accountReq := &accountsv1.AccountRequest{OwnerId: req.UserID}
