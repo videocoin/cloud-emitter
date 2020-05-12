@@ -239,6 +239,7 @@ github.com/videocoin/cloud-pkg/faucet
 github.com/videocoin/cloud-pkg/grpcutil
 github.com/videocoin/cloud-pkg/logger
 github.com/videocoin/cloud-pkg/mqmux
+github.com/videocoin/cloud-pkg/paymentmanager
 github.com/videocoin/cloud-pkg/rpcutils
 github.com/videocoin/cloud-pkg/tracer
 # github.com/videocoin/go-protocol v0.0.6

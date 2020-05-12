@@ -53,6 +53,7 @@ function get_vars() {
     readonly ACCOUNTS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/accountsRpcAddr`
     readonly STREAM_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/streamManagerContractAddr`
     readonly STAKING_MANAGER_CONTRACT_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/stakingManagerContractAddr`
+    readonly PM_HOST=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/pmHost`
     readonly SYMPHONY_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/symphonyAddr`
     readonly SYMPHONY_OAUTH_CLIENT_ID=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/oauthClientId`
     readonly SYMPHONY_RPC_KEY=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/rpcKey`
@@ -72,6 +73,7 @@ function deploy() {
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
         --set config.streamManagerContractAddr="${STREAM_MANAGER_CONTRACT_ADDR}" \
         --set config.stakingManagerContractAddr="${STAKING_MANAGER_CONTRACT_ADDR}" \
+        --set config.pmHost="${PM_HOST}" \
         --set secrets.symphonyAddr="${SYMPHONY_ADDR}" \
         --set secrets.symphonyOauthClientId="${SYMPHONY_OAUTH_CLIENT_ID}" \
         --set secrets.symphonyRpcKey="${SYMPHONY_RPC_KEY}" \

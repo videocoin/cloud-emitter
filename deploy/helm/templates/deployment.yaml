@@ -55,6 +55,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: stakingManagerContractAddr
+            - name: PAYMENT_MANAGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: pmHost
             - name: SYMPHONY_ADDR
               valueFrom:
                 secretKeyRef:

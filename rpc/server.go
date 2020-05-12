@@ -9,6 +9,7 @@ import (
 	"github.com/videocoin/cloud-emitter/contract"
 	faucetcli "github.com/videocoin/cloud-pkg/faucet"
 	"github.com/videocoin/cloud-pkg/grpcutil"
+	"github.com/videocoin/cloud-pkg/paymentmanager"
 	"github.com/videocoin/go-staking"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -23,6 +24,7 @@ type ServerOpts struct {
 	Staking  *staking.Client
 	Accounts accountsv1.AccountServiceClient
 	Faucet   *faucetcli.Client
+	PM       *paymentmanager.Client
 }
 
 type Server struct {
@@ -34,6 +36,7 @@ type Server struct {
 	staking  *staking.Client
 	accounts accountsv1.AccountServiceClient
 	faucet   *faucetcli.Client
+	pm       *paymentmanager.Client
 }
 
 func NewRPCServer(opts *ServerOpts) (*Server, error) {
@@ -57,6 +60,7 @@ func NewRPCServer(opts *ServerOpts) (*Server, error) {
 		staking:  opts.Staking,
 		accounts: opts.Accounts,
 		faucet:   opts.Faucet,
+		pm:       opts.PM,
 	}
 
 	v1.RegisterEmitterServiceServer(grpcServer, rpcServer)

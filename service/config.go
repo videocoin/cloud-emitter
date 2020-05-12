@@ -18,6 +18,7 @@ type Config struct {
 	SymphonyOauthClientID string `envconfig:"SYMPHONY_OAUTH_CLIENT_ID" required:"true"`
 	SymphonyRPCKey        string `envconfig:"SYMPHONY_RPC_KEY" required:"true"`
 	SymphonyFaucetKey     string `envconfig:"SYMPHONY_FAUCET_KEY" required:"true"`
+	PaymentManagerHost    string `envconfig:"PAYMENT_MANAGER_HOST" required:"true"`
 
 	StreamManagerContractAddr  string `envconfig:"STREAM_MANAGER_CONTRACT_ADDR" required:"true"`
 	StakingManagerContractAddr string `envconfig:"STAKING_MANAGER_CONTRACT_ADDR" required:"true"`

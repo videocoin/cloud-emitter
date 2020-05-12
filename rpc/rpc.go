@@ -15,6 +15,7 @@ import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-api/rpc"
+	"github.com/videocoin/cloud-pkg/ethutils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -276,6 +277,43 @@ func (s *Server) AddFunds(ctx context.Context, req *v1.AddFundsRequest) (*v1.Add
 	if err != nil {
 		return resp, err
 	}
+
+	return resp, nil
+}
+
+func (s *Server) GetReward(ctx context.Context, req *v1.RewardRequest) (*v1.RewardResponse, error) {
+	resp := new(v1.RewardResponse)
+
+	logger := s.logger.WithField("address", req.Address)
+
+	if s.pm == nil {
+		return resp, nil
+	}
+
+	reward, err := s.pm.GetReward(req.Address)
+	if err != nil {
+		if err.Error() == "error 404" {
+			return resp, nil
+		}
+		logger.WithError(err).Error("failed to get reward")
+		return resp, nil
+	}
+
+	if reward.Amount == "" {
+		return resp, nil
+	}
+
+	rewardInt, err := ethutils.ParseBigInt(reward.Amount)
+	if err != nil {
+		logger.WithError(err).Error("failed to parse amount")
+	}
+
+	v, err := ethutils.WeiToEth(&rewardInt)
+	if err != nil {
+		logger.WithError(err).Error("failed to convert wei to eth")
+	}
+
+	resp.Reward, _ = v.Float64()
 
 	return resp, nil
 }

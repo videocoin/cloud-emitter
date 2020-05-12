@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 
+	"github.com/videocoin/cloud-pkg/paymentmanager"
+
 	"github.com/ethereum/go-ethereum/common"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	"github.com/videocoin/cloud-emitter/contract"
@@ -54,6 +56,8 @@ func NewService(cfg *Config) (*Service, error) {
 		faucetcli.WithTokenSource(cfg.SymphonyOauthClientID, cfg.SymphonyFaucetKey),
 	)
 
+	pm := paymentmanager.NewClient(cfg.PaymentManagerHost)
+
 	rpcConfig := &rpc.ServerOpts{
 		Addr:     cfg.RPCAddr,
 		Contract: contract,
@@ -61,6 +65,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Logger:   cfg.Logger.WithField("system", "rpc"),
 		Accounts: accounts,
 		Faucet:   faucet,
+		PM:       pm,
 	}
 
 	rpc, err := rpc.NewRPCServer(rpcConfig)
