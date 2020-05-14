@@ -24,4 +24,6 @@ type Config struct {
 	StakingManagerContractAddr string `envconfig:"STAKING_MANAGER_CONTRACT_ADDR" required:"true"`
 
 	ClientSecret string `envconfig:"CLIENT_SECRET" required:"true"`
+	ConsulAddr   string `envconfig:"CONSUL_ADDR" default:"config-consul:8500"`
+	Env          string `envconfig:"CLUSTER_ENV" default:"dev"`
 }

@@ -6,6 +6,8 @@ github.com/AlekSi/pointer
 github.com/VictoriaMetrics/fastcache
 # github.com/aristanetworks/goarista v0.0.0-20200306225906-e0480e715858
 github.com/aristanetworks/goarista/monotime
+# github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da
+github.com/armon/go-metrics
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
 # github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3
@@ -129,9 +131,19 @@ github.com/grpc-ecosystem/go-grpc-prometheus
 github.com/grpc-ecosystem/grpc-gateway/internal
 github.com/grpc-ecosystem/grpc-gateway/runtime
 github.com/grpc-ecosystem/grpc-gateway/utilities
+# github.com/hashicorp/consul/api v1.3.0
+github.com/hashicorp/consul/api
+# github.com/hashicorp/go-cleanhttp v0.5.1
+github.com/hashicorp/go-cleanhttp
+# github.com/hashicorp/go-immutable-radix v1.0.0
+github.com/hashicorp/go-immutable-radix
+# github.com/hashicorp/go-rootcerts v1.0.0
+github.com/hashicorp/go-rootcerts
 # github.com/hashicorp/golang-lru v0.5.3
 github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
+# github.com/hashicorp/serf v0.8.2
+github.com/hashicorp/serf/coordinate
 # github.com/huin/goupnp v1.0.0
 github.com/huin/goupnp
 github.com/huin/goupnp/dcps/internetgateway1
@@ -152,6 +164,10 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/mattn/go-runewidth
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
+# github.com/mitchellh/go-homedir v1.0.0
+github.com/mitchellh/go-homedir
+# github.com/mitchellh/mapstructure v1.1.2
+github.com/mitchellh/mapstructure
 # github.com/olekukonko/tablewriter v0.0.2-0.20190409134802-7e037d187b0c
 github.com/olekukonko/tablewriter
 # github.com/opentracing/opentracing-go v1.1.0

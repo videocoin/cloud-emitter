@@ -11,6 +11,7 @@ require (
 	github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff // indirect
 	github.com/gogo/protobuf v1.3.1
 	github.com/gorilla/websocket v1.4.1 // indirect
+	github.com/hashicorp/consul/api v1.3.0
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/karalabe/usb v0.0.0-20190919080040-51dc0efba356 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0

@@ -41,6 +41,11 @@ func NewService(cfg *Config) (*Service, error) {
 		Accounts:     accounts,
 	}
 
+	err = contract.LoadKSFromConsul(cfg.ConsulAddr, cfg.Env)
+	if err != nil {
+		return nil, err
+	}
+
 	contract, err := contract.NewContractClient(contractOpts)
 	if err != nil {
 		return nil, err

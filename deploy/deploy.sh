@@ -74,6 +74,7 @@ function deploy() {
         --set config.streamManagerContractAddr="${STREAM_MANAGER_CONTRACT_ADDR}" \
         --set config.stakingManagerContractAddr="${STAKING_MANAGER_CONTRACT_ADDR}" \
         --set config.pmHost="${PM_HOST}" \
+        --set config.clusterEnv="${ENV}" \
         --set secrets.symphonyAddr="${SYMPHONY_ADDR}" \
         --set secrets.symphonyOauthClientId="${SYMPHONY_OAUTH_CLIENT_ID}" \
         --set secrets.symphonyRpcKey="${SYMPHONY_RPC_KEY}" \
