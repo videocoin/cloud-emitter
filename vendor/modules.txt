@@ -197,6 +197,8 @@ github.com/prometheus/tsdb/fileutil
 github.com/rjeczalik/notify
 # github.com/rs/cors v1.7.0
 github.com/rs/cors
+# github.com/schoentoon/logrus-loki v0.0.0-20191021224953-4928b3c6b192
+github.com/schoentoon/logrus-loki
 # github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
 # github.com/status-im/keycard-go v0.0.0-20190424133014-d95853db0f48
