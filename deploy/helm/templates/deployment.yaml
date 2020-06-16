@@ -16,20 +16,31 @@ spec:
       name: {{ .Release.Name }}
       labels:
         app: {{ .Release.Name }}
+    {{- with .Values.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      automountServiceAccountToken: true
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["bash", "-c", "source /vault/secrets/common && source /vault/secrets/config && /emitter"]
           ports:
-            - containerPort: {{ .Values.service.internalRpcPort }}
+            - containerPort: {{ .Values.service.ports.grpc }}
           readinessProbe:
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalRpcPort }}"]
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.ports.grpc }}"]
             initialDelaySeconds: 5
           livenessProbe:
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalRpcPort }}"]
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.ports.grpc }}"]
             initialDelaySeconds: 10
           env:
             - name: JAEGER_AGENT_HOST
@@ -39,64 +50,10 @@ spec:
             - name: JAEGER_AGENT_PORT
               value: "6831"
             - name: RPC_ADDR
-              value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
-            - name: CLUSTER_ENV
-              value: {{ .Values.config.clusterEnv }}
-            - name: ACCOUNTS_RPC_ADDR
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: accountsRpcAddr
-            - name: STREAM_MANAGER_CONTRACT_ADDR
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: streamManagerContractAddr
-            - name: STAKING_MANAGER_CONTRACT_ADDR
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: stakingManagerContractAddr
-            - name: PAYMENT_MANAGER_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: pmHost
-            - name: SYMPHONY_ADDR
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: symphonyAddr
-            - name: SYMPHONY_OAUTH_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: symphonyOauthClientId
-            - name: SYMPHONY_RPC_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: symphonyRpcKey
-            - name: SYMPHONY_FAUCET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: symphonyFaucetKey
-            - name: CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: clientSecret
-            - name: MQURI
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: mqUri
-            - name: SENTRY_DSN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: sentryDsn
+              value: 0.0.0.0:{{ .Values.service.ports.grpc }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Chart.Name }}
           {{- if .Values.resources }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
@@ -105,12 +62,7 @@ spec:
         - name: config
           configMap:
             name: {{ .Release.Name }}
-        - name: secrets
-          secret:
-            secretName: {{ .Release.Name }}
+    {{- with .Values.nodeSelector }}
       nodeSelector:
-        cloud.google.com/gke-nodepool: api
-
-
-
-
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
