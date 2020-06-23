@@ -243,15 +243,28 @@ func (s *Server) GetWorker(ctx context.Context, req *v1.WorkerRequest) (*v1.Work
 	span := opentracing.SpanFromContext(ctx)
 	otCtx := opentracing.ContextWithSpan(context.Background(), span)
 
+	logger := s.logger.WithField("address", req.Address)
+	logger.Info("getting worker")
+
 	if !common.IsHexAddress(req.Address) {
+		logger.Warning("wrong address")
 		return nil, rpc.ErrRpcBadRequest
 	}
 
 	address := common.HexToAddress(req.Address)
 	worker, err := s.staking.GetTranscoder(otCtx, address)
 	if err != nil {
+		logger.WithError(err).Error("failed to get worker")
 		return nil, rpc.NewRpcInternalError(err)
 	}
+
+	logger.WithFields(logrus.Fields{
+		"state":           worker.State,
+		"state_human":     v1.WorkerState(worker.State).String(),
+		"total_stake":     worker.TotalStake.String(),
+		"self_stake":      worker.SelfStake.String(),
+		"delegated_stake": worker.DelegatedStake.String(),
+	}).Info("worker info")
 
 	resp := &v1.WorkerResponse{
 		Address:        worker.Address.Hex(),
