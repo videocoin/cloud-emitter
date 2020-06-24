@@ -14,6 +14,7 @@ const (
 	StateBonded
 	StateUnbonded
 	StateUnbonding
+	StateUnregistered
 )
 
 type Transcoder struct {
@@ -26,6 +27,8 @@ type Transcoder struct {
 	Capacity       *big.Int
 	// Timestamp is registration time in seconds.
 	Timestamp uint64
+	// EffectiveMinSelfStake is a global MinSelfStake parameter that was effective when transcoder registered.
+	EffectiveMinSelfStake *big.Int
 }
 
 type WithdrawalInfo struct {
