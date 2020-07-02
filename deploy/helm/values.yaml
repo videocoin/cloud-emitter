@@ -27,10 +27,10 @@ autoscaler:
 resources:
   limits:
     cpu: 500m
-    memory: 512Mi
+    memory: 1024Mi
   requests:
     cpu: 500m
-    memory: 512Mi
+    memory: 1024Mi
 
 annotations:
   vault.hashicorp.com/agent-inject: "true"
