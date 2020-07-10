@@ -37,6 +37,8 @@ annotations:
   vault.hashicorp.com/role: "console-emitter"
   vault.hashicorp.com/agent-inject-secret-common: "videocoin/v1/networks/everest-dev/console/common"
   vault.hashicorp.com/agent-inject-secret-config: "videocoin/v1/networks/everest-dev/console/emitter"
+  vault.hashicorp.com/agent-inject-secret-sa-managers: "videocoin/v1/networks/everest-dev/console/sa_managers"
+  vault.hashicorp.com/agent-inject-secret-sa-validators: "videocoin/v1/networks/everest-dev/console/sa_validators"
   vault.hashicorp.com/agent-inject-template-common: |
     {{ with secret "videocoin/v1/networks/everest-dev/console/common" }}{{ range $k, $v := .Data }}
     export {{ $k }}="{{ $v }}"
