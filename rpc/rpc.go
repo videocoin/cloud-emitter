@@ -2,8 +2,10 @@ package rpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/AlekSi/pointer"
@@ -254,6 +256,14 @@ func (s *Server) GetWorker(ctx context.Context, req *v1.WorkerRequest) (*v1.Work
 	address := common.HexToAddress(req.Address)
 	worker, err := s.staking.GetTranscoder(otCtx, address)
 	if err != nil {
+		if strings.Contains(err.Error(), "not registered") {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		if strings.Contains(err.Error(), "502 Bad Gateway") {
+			return nil, rpc.NewRpcInternalError(errors.New("502 Bad Gateway"))
+		}
+
 		logger.WithError(err).Error("failed to get worker")
 		return nil, rpc.NewRpcInternalError(err)
 	}
