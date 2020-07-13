@@ -99,7 +99,7 @@ func (e *EventBus) handleAccountEvent(d amqp.Delivery) error {
 				e.logger.WithField("address", req.Address).Errorf("failed to emit account created")
 			}
 
-			err = e.faucet.Do(req.Address, 10)
+			err = e.faucet.Do(req.Address, 100)
 			if err != nil {
 				e.logger.WithField("address", req.Address).Errorf("failed to faucet")
 				return nil
