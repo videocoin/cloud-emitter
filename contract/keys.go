@@ -1,7 +1,11 @@
 package contract
 
 import (
+	"bufio"
+	"errors"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -42,4 +46,63 @@ func GetManagerKS() ([]byte, string) {
 func GetValidatorKS() ([]byte, string) {
 	item := validatorKSPool.Next()
 	return []byte(item.Key), item.Secret
+}
+
+func loadKSFromFile(path string) ([]*KSItem, error) {
+	ks := []*KSItem{}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.SplitN(line, ":", 2)
+
+		if len(parts) != 2 {
+			continue
+		}
+
+		item := &KSItem{
+			Secret: strings.TrimSpace(parts[0]),
+			Key: strings.TrimSpace(parts[1]),
+		}
+
+		ks = append(ks, item)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(ks) == 0 {
+		return nil, errors.New("empty ks list")
+	}
+
+	return ks, nil
+}
+
+func LoadKSFromFiles(managerKSPath, validatorKSPath string) error {
+	mks, err := loadKSFromFile(managerKSPath)
+	if err != nil {
+		return err
+	}
+
+	vks, err := loadKSFromFile(validatorKSPath)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range mks {
+		managerKS = append(managerKS, item)
+	}
+
+	for _, item := range vks {
+		validatorKS = append(validatorKS, item)
+	}
+
+	return nil
 }

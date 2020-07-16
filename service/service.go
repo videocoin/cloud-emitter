@@ -41,7 +41,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Accounts:     accounts,
 	}
 
-	err = contract.LoadKSFromConsul(cfg.ConsulAddr, cfg.Env)
+	err = contract.LoadKSFromFiles(cfg.ManagersKSPath, cfg.ValidatorsKSPath)
 	if err != nil {
 		return nil, err
 	}
