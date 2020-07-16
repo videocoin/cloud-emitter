@@ -19,13 +19,6 @@ type KSItem struct {
 var managerKS = []*KSItem{}
 var validatorKS = []*KSItem{}
 
-// func init() {
-// 	managerKS = shuffle(managerKS)
-// 	validatorKS = shuffle(validatorKS)
-// 	managerKSPool, _ = NewRoundRobin(managerKS)
-// 	validatorKSPool, _ = NewRoundRobin(validatorKS)
-// }
-
 func shuffle(vals []*KSItem) []*KSItem {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	ret := make([]*KSItem, len(vals))
@@ -68,7 +61,7 @@ func loadKSFromFile(path string) ([]*KSItem, error) {
 
 		item := &KSItem{
 			Secret: strings.TrimSpace(parts[0]),
-			Key: strings.TrimSpace(parts[1]),
+			Key:    strings.TrimSpace(parts[1]),
 		}
 
 		ks = append(ks, item)
@@ -102,6 +95,19 @@ func LoadKSFromFiles(managerKSPath, validatorKSPath string) error {
 
 	for _, item := range vks {
 		validatorKS = append(validatorKS, item)
+	}
+
+	managerKS = shuffle(managerKS)
+	validatorKS = shuffle(validatorKS)
+
+	managerKSPool, err = NewRoundRobin(managerKS)
+	if err != nil {
+		return err
+	}
+
+	validatorKSPool, err = NewRoundRobin(validatorKS)
+	if err != nil {
+		return err
 	}
 
 	return nil
