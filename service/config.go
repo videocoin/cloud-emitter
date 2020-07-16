@@ -21,6 +21,6 @@ type Config struct {
 	StreamManagerContractAddr  string `envconfig:"STREAM_MANAGER_CONTRACT_ADDR" required:"true"`
 	StakingManagerContractAddr string `envconfig:"STAKING_MANAGER_CONTRACT_ADDR" required:"true"`
 	ClientSecret               string `envconfig:"CLIENT_SECRET" required:"true"`
-	ManagersKSPath             string `envconfig:"MANAGERS_KS_PATH" default:"/vault/secret/sa-managers"`
-	ValidatorsKSPath           string `envconfig:"VALIDATORS_KS_PATH" default:"/vault/secret/sa-validators"`
+	ManagersKSPath             string `envconfig:"MANAGERS_KS_PATH" default:"/vault/secrets/sa-managers"`
+	ValidatorsKSPath           string `envconfig:"VALIDATORS_KS_PATH" default:"/vault/secrets/sa-validators"`
 }
