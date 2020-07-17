@@ -1,3 +1,4 @@
+apiVersion: v2
 name: emitter
-version: 1.1.1-pe
-appVersion: 1.0.0
+version: 1.1.1
+appVersion: v1.1.0
