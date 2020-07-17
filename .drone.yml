@@ -1,6 +1,6 @@
 kind: pipeline
 type: kubernetes
-name: emitter
+name: release-develop
 
 steps:
   - name: build
@@ -28,14 +28,13 @@ trigger:
     - push
     - pull_request
   branch:
-    - drone
     - infra
 
 
 ---
 kind: pipeline
 type: kubernetes
-name: helm
+name: helm-push
 
 steps:
   - name: lint-chart
