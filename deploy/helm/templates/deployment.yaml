@@ -1,11 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    heritage: {{ .Release.Service }}
+    app: {{ .Chart.Name }}
 spec:
   replicas: {{ .Values.replicasCount | default  "1" }}
   strategy:
@@ -21,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+    {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
