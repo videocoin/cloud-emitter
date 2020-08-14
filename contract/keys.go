@@ -3,6 +3,7 @@ package contract
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"strings"
@@ -63,6 +64,8 @@ func loadKSFromFile(path string) ([]*KSItem, error) {
 			Secret: strings.TrimSpace(parts[0]),
 			Key:    strings.TrimSpace(parts[1]),
 		}
+
+		fmt.Printf("%+v\n", item)
 
 		ks = append(ks, item)
 	}
