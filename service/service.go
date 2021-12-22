@@ -29,7 +29,7 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	accounts := accountsv1.NewAccountServiceClient(conn)
 
-	ethClient, err := rpcutils.SymphonyRPCClient(cfg.SymphonyAddr, cfg.SymphonyOauthClientID, cfg.SymphonyRPCKey)
+	ethClient, err := rpcutils.SymphonyRPCClient(cfg.SymphonyAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial eth client: %s", err.Error())
 	}
