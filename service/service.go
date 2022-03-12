@@ -56,10 +56,7 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	faucet := faucetcli.NewClient(
-		fmt.Sprintf("%s/v1/faucet", cfg.SymphonyAddr),
-		faucetcli.WithTokenSource(cfg.SymphonyOauthClientID, cfg.SymphonyFaucetKey),
-	)
+	faucet := faucetcli.NewClient(fmt.Sprintf("%s/v1/faucet", cfg.FaucetAddr))
 
 	pm := paymentmanager.NewClient(cfg.PaymentManagerHost)
 

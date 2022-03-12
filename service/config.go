@@ -13,6 +13,7 @@ type Config struct {
 	RPCAddr                    string `envconfig:"RPC_ADDR" default:"0.0.0.0:5003"`
 	AccountsRPCAddr            string `envconfig:"ACCOUNTS_RPC_ADDR" default:"0.0.0.0:5001"`
 	MQURI                      string `envconfig:"MQURI" default:"amqp://guest:guest@127.0.0.1:5672"`
+	FaucetAddr                 string `envconfig:"FAUCET_ADDR" required:"true"`
 	SymphonyAddr               string `envconfig:"SYMPHONY_ADDR" required:"true"`
 	SymphonyOauthClientID      string `envconfig:"SYMPHONY_OAUTH_CLIENT_ID" required:"true"`
 	SymphonyFaucetKey          string `envconfig:"SYMPHONY_FAUCET_KEY" required:"true"`
